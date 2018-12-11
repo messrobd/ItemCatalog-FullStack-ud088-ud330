@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Create cheese</title>
+  </head>
+  <body>
+    <h1>Create a new cheese</h1>
+    <form class="new-cheese" action="/catalog/cheese/new" method="POST">
+      <label>Name:
+          <input name="name">
+      </label>
+      <label>Description:
+          <input name="description">
+      </label>
+      <label>Milk:
+          <input name="milk">
+      </label>
+      <label>Place of origin:
+          <input name="place">
+      </label>
+
+      <button type="submit">Create cheese</button>
+    </form>
+    <button type="button" onclick="window.history.back()">Cancel</button>
+  </body>
+</html>

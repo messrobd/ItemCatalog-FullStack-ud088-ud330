@@ -43,7 +43,7 @@ def get_cheese(cheese_id):
 
 @app.route('/catalog/cheese/new')
 def new_cheese():
-    return 'new cheese'
+    return render_template('new_cheese.html')
 
 @app.route('/catalog/cheese/edit/<int:cheese_id>')
 def edit_cheese(cheese_id):

@@ -5,13 +5,12 @@
     <title>{{ variety.name }}</title>
   </head>
   <body>
-    <div class="variety">
-      <div class="v-name">
-        <h1>{{ variety.name }}</h1>
-      </div>
-      <div class="v-description">
-        {{ variety.description }}
-      </div>
+    <div class="variety-heading">
+      <h1>{{ variety.name }}</h1>
+      <button type="button" onclick="window.location.href='{{ url_for('new_cheese') }}'">Create new cheese</button>
+    </div>
+    <div class="v-description">
+      {{ variety.description }}
     </div>
     <div class="cheese-list">
       <ul>
