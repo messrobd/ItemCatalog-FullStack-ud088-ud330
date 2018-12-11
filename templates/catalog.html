@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Cheese catalog</title>
+  </head>
+  <body>
+    <div class="login-status"></div>
+    <div class="catalog-heading">
+      <h1>Cheeses</h1>
+    </div>
+    <ul class="varieties">
+      {% for v in varieties %}
+        <li>{{ v }} </li>
+        <ul>
+          {% for c in range(preview_list) %}
+            <li><a href="#">{{ cheeses[c] }}</a> </li>
+          {% endfor %}
+          {% if more_cheese %}
+            <li><a href="#">More {{ v }} </a> </li>
+          {% endif %}
+        </ul>
+      {% endfor %}
+    </ul>
+
+  </body>
+</html>

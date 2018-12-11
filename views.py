@@ -1,12 +1,24 @@
 #!/usr/bin/env python3
-from flask import Flask
+from flask import \
+    Flask, \
+    render_template
 
 app = Flask(__name__)
+
+varieties = ['Blue cheese', 'Brown cheese']
+cheeses = ['stilton', 'gorgonzola', 'roquefort', 'selbu', 'shropshire']
+#cheeses = ['stilton']
 
 @app.route('/')
 @app.route('/catalog')
 def get_index():
-    return 'catalog'
+    more_cheese = len(cheeses) > 5
+    preview_list = 5 if more_cheese else len(cheeses)
+    return render_template('catalog.html', \
+        varieties=varieties, \
+        cheeses=cheeses, \
+        preview_list=preview_list, \
+        more_cheese=more_cheese)
 
 @app.route('/catalog/variety/<int:variety_id>')
 def get_cheeses(variety_id):
