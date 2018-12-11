@@ -1,13 +1,24 @@
 #!/usr/bin/env python3
 from flask import \
     Flask, \
-    render_template
+    render_template, \
+    url_for
+from models import \
+    Variety, \
+    Cheese
 
 app = Flask(__name__)
 
-varieties = ['Blue cheese', 'Brown cheese']
-cheeses = ['stilton', 'gorgonzola', 'roquefort', 'selbu', 'shropshire']
-#cheeses = ['stilton']
+varieties = [
+    Variety(0, 'Blue cheese', 'moldy and good'),
+    Variety(1, 'Brown cheese', 'fudgy and weird')]
+cheeses = [
+    Cheese(0, 'stilton'),
+    Cheese(1, 'gorgonzola'),
+    Cheese(2, 'roquefort'),
+    Cheese(3, 'selbu'),
+    Cheese(4, 'shropshire')]
+cheeses += [Cheese(5, 'gorgonzola dolce')]
 
 @app.route('/')
 @app.route('/catalog')
@@ -22,11 +33,13 @@ def get_index():
 
 @app.route('/catalog/variety/<int:variety_id>')
 def get_cheeses(variety_id):
-    return 'cheeses of variety {}'.format(variety_id)
+    return render_template('cheeses.html', \
+    variety=varieties[variety_id], \
+    cheeses=cheeses)
 
 @app.route('/catalog/cheese/<int:cheese_id>')
 def get_cheese(cheese_id):
-    return 'cheese {}'.format(cheese_id)
+    return render_template('cheese.html', cheese=cheeses[cheese_id])
 
 @app.route('/catalog/cheese/new')
 def new_cheese():

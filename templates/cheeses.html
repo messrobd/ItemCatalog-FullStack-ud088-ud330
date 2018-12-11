@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{ variety.name }}</title>
+  </head>
+  <body>
+    <div class="variety">
+      <div class="v-name">
+        <h1>{{ variety.name }}</h1>
+      </div>
+      <div class="v-description">
+        {{ variety.description }}
+      </div>
+    </div>
+    <div class="cheese-list">
+      <ul>
+        {% for c in cheeses %}
+          <li><a href="{{ url_for('get_cheese', cheese_id=c.id) }}">{{ c.name }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </body>
+</html>

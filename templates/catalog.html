@@ -11,13 +11,13 @@
     </div>
     <ul class="varieties">
       {% for v in varieties %}
-        <li>{{ v }} </li>
+        <li>{{ v.name }} </li>
         <ul>
           {% for c in range(preview_list) %}
-            <li><a href="#">{{ cheeses[c] }}</a> </li>
+            <li><a href="{{ url_for('get_cheese', cheese_id=c) }}">{{ cheeses[c].name }}</a> </li>
           {% endfor %}
           {% if more_cheese %}
-            <li><a href="#">More {{ v }} </a> </li>
+            <li><a href="{{ url_for('get_cheeses', variety_id=v.id) }}">More {{ v.name }} </a> </li>
           {% endif %}
         </ul>
       {% endfor %}
