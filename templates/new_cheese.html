@@ -10,11 +10,22 @@
       <label>Name:
           <input name="name">
       </label>
+      <label>Type:
+        <select name="type">
+          {% for t in types %}
+            <option value="{{ t.name  }}">{{ t.name  }}</option>
+          {% endfor %}
+        </select>
+      </label>
       <label>Description:
           <input name="description">
       </label>
       <label>Milk:
-          <input name="milk">
+        <select name="milk">
+          {% for m in milks %}
+            <option value="{{ m.name  }}">{{ m.name  }}</option>
+          {% endfor %}
+        </select>
       </label>
       <label>Place of origin:
           <input name="place">

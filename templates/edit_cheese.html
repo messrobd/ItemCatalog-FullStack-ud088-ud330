@@ -10,11 +10,30 @@
       <label>Name:
           <input name="name" value="{{ cheese.name }}">
       </label>
+      <label>Type:
+        <select name="type">
+          {% for t in types %}
+            {% if t.name == cheese.type %}
+              <option value="{{ t.name  }}" selected>{{ t.name  }}</option>
+            {% else %}
+              <option value="{{ t.name  }}">{{ t.name  }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </label>
       <label>Description:
           <input name="description" value="{{ cheese.description }}">
       </label>
       <label>Milk:
-          <input name="milk" value="{{ cheese.milk }}">
+        <select name="milk">
+          {% for m in milks %}
+            {% if m.name == cheese.milk %}
+              <option value="{{ m.name  }}" selected>{{ m.name  }}</option>
+            {% else %}
+              <option value="{{ m.name  }}">{{ m.name  }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
       </label>
       <label>Place of origin:
           <input name="place" value="{{ cheese.place }}">
