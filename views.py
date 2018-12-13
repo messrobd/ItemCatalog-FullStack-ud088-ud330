@@ -20,6 +20,7 @@ cheeses = [
     Cheese(4, 'shropshire')]
 cheeses += [Cheese(5, 'gorgonzola dolce')]
 
+# page view handlers
 @app.route('/')
 @app.route('/catalog')
 def get_index():
@@ -45,11 +46,11 @@ def get_cheese(cheese_id):
 def new_cheese():
     return render_template('new_cheese.html')
 
-@app.route('/catalog/cheese/edit/<int:cheese_id>')
+@app.route('/catalog/cheese/<int:cheese_id>/edit')
 def edit_cheese(cheese_id):
-    return 'edit cheese {}'.format(cheese_id)
+    return render_template('edit_cheese.html', cheese=cheeses[cheese_id])
 
-@app.route('/catalog/cheese/delete/<int:cheese_id>')
+@app.route('/catalog/cheese/<int:cheese_id>/delete')
 def delete_cheese(cheese_id):
     return 'delete cheese {}'.format(cheese_id)
 

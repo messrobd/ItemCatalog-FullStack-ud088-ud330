@@ -6,8 +6,9 @@
   </head>
   <body>
     <div class="cheese">
-      <div class="">
+      <div class="cheese-heading">
         <h1>{{ cheese.name }}</h1>
+        <button type="button" onclick="window.location.href='{{ url_for('edit_cheese', cheese_id=cheese.id) }}'">Edit</button>
       </div>
 
     </div>

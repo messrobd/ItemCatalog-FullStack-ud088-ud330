@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Edit cheese</title>
+  </head>
+  <body>
+    <h1>Edit a cheese</h1>
+    <form class="update-cheese" action="/catalog/cheese/edit/{{ cheese.id }}" method="POST">
+      <label>Name:
+          <input name="name" value="{{ cheese.name }}">
+      </label>
+      <label>Description:
+          <input name="description" value="{{ cheese.description }}">
+      </label>
+      <label>Milk:
+          <input name="milk" value="{{ cheese.milk }}">
+      </label>
+      <label>Place of origin:
+          <input name="place" value="{{ cheese.place }}">
+      </label>
+
+      <button type="submit">Update cheese</button>
+    </form>
+    <button type="button" onclick="window.history.back()">Cancel</button>
+  </body>
+</html>
