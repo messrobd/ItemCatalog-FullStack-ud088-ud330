@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Delete cheese</title>
+  </head>
+  <body>
+    <h1>{{ cheese.name }} will be be permanently deleted, are you sure?</h1>
+    <form class="delete-cheese" action="{{ url_for('delete_cheese', cheese_id=cheese.id) }}" method="POST">
+      <button type="submit" name="delete">Delete</button>
+    </form>
+    <button type="button" onclick="window.history.back()">Cancel</button>
+
+  </body>
+</html>

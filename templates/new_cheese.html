@@ -6,7 +6,7 @@
   </head>
   <body>
     <h1>Create a new cheese</h1>
-    <form class="new-cheese" action="/catalog/cheese/new" method="POST">
+    <form class="new-cheese" action="{{ url_for('new_cheese') }}" method="POST">
       <label>Name:
           <input name="name">
       </label>

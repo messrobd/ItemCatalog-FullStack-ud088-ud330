@@ -6,7 +6,7 @@
   </head>
   <body>
     <h1>Edit a cheese</h1>
-    <form class="update-cheese" action="/catalog/cheese/edit/{{ cheese.id }}" method="POST">
+    <form class="update-cheese" action="{{ url_for('edit_cheese', cheese_id=cheese.id) }}" method="POST">
       <label>Name:
           <input name="name" value="{{ cheese.name }}">
       </label>

@@ -52,7 +52,7 @@ def edit_cheese(cheese_id):
 
 @app.route('/catalog/cheese/<int:cheese_id>/delete')
 def delete_cheese(cheese_id):
-    return 'delete cheese {}'.format(cheese_id)
+    return render_template('delete_cheese.html', cheese=cheeses[cheese_id])
 
 @app.route('/login')
 def login():
