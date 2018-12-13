@@ -8,7 +8,9 @@
     <div class="login-status"></div>
     <div class="catalog-heading">
       <h1>Cheeses</h1>
-      <button type="button" onclick="window.location.href='{{ url_for('new_cheese') }}'">Create new cheese</button>
+      <form class="create-cheese">
+        <input type="button" name="create" onclick="window.location.href='{{ url_for('new_cheese') }}'" value="Create new cheese">
+      </form>
     </div>
     <ul class="varieties">
       {% for v in varieties %}

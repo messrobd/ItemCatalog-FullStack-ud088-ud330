@@ -8,10 +8,11 @@
     <div class="cheese">
       <div class="cheese-heading">
         <h1>{{ cheese.name }}</h1>
-        <button type="button" onclick="window.location.href='{{ url_for('edit_cheese', cheese_id=cheese.id) }}'">Edit</button>
-        <button type="button" onclick="window.location.href='{{ url_for('delete_cheese', cheese_id=cheese.id) }}'">Delete</button>
+        <form class="cheese-actions">
+          <input type="button" name="edit" onclick="location.href='{{ url_for('edit_cheese', cheese_id=cheese.id) }}'" value="Edit">
+          <input type="button" name="delete" onclick="location.href='{{ url_for('delete_cheese', cheese_id=cheese.id) }}'" value="Delete">
+        </form>
       </div>
-
     </div>
 
   </body>
