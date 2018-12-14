@@ -4,6 +4,7 @@ from flask import \
     render_template, \
     url_for
 from models import \
+    Base, \
     Type, \
     Milk, \
     Cheese
@@ -12,6 +13,7 @@ from sqlalchemy.orm import sessionmaker
 
 app = Flask(__name__)
 engine = create_engine('sqlite:///cheese.db')
+Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 # session = DBSession()

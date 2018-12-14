@@ -1,23 +1,33 @@
+from models import \
+    Base, \
+    Type, \
+    Milk, \
+    Cheese
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 engine = create_engine('sqlite:///cheese.db')
+Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 session = DBSession()
 
 types = [
-    Type(0, 'Blue cheese', 'moldy and good'),
-    Type(1, 'Brown cheese', 'fudgy and weird')]
+    Type(name='Blue cheese', description='moldy and good'),
+    Type(name='Brown cheese', description='fudgy and weird')]
+
 milks = [
-    Milk('cow'),
-    Milk('goat'),
-    Milk('sheep'),
-    Milk('buffalo')]
+    Milk(name='cow'),
+    Milk(name='goat')]
+
 cheeses = [
-    Cheese(0, 'stilton', 'Blue cheese', 'cow'),
-    Cheese(1, 'gorgonzola', 'Blue cheese', 'cow'),
-    Cheese(2, 'roquefort', 'Blue cheese', 'cow'),
-    Cheese(3, 'selbu', 'Blue cheese', 'cow'),
-    Cheese(4, 'shropshire', 'Blue cheese', 'cow')]
-cheeses += [Cheese(5, 'Gudbrandsdalsost', 'Brown cheese', 'goat')]
+    Cheese(name='stilton', type_id=1, milk_id=1),
+    Cheese(name='Gudbrandsdalsost', type_id=2, milk_id=2)]
+
+for t, m, c in zip(types, milks, cheeses):
+    session.add(t)
+    session.add(m)
+    session.add(c)
+    session.commit()
+
+session.close()
