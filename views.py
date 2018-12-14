@@ -30,19 +30,16 @@ cheeses += [Cheese(5, 'Gudbrandsdalsost', 'Brown cheese', 'goat')]
 @app.route('/')
 @app.route('/catalog')
 def get_index():
-    more_cheese = len(cheeses) > 5
-    preview_list = 5 if more_cheese else len(cheeses)
     return render_template('catalog.html', \
         types=types, \
-        cheeses=cheeses, \
-        preview_list=preview_list, \
-        more_cheese=more_cheese)
+        cheeses=cheeses)
 
 @app.route('/catalog/type/<int:type_id>')
 def get_cheeses(type_id):
+    cheeses_of_type = filter(lambda c: c.type == type_id, cheeses)
     return render_template('cheeses.html', \
         type=types[type_id], \
-        cheeses=cheeses)
+        cheeses=cheeses_of_type)
 
 @app.route('/catalog/cheese/<int:cheese_id>')
 def get_cheese(cheese_id):

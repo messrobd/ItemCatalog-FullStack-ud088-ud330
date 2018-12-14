@@ -14,15 +14,7 @@
     </div>
     <ul class="types">
       {% for t in types %}
-        <li>{{ t.name }} </li>
-        <ul>
-          {% for c in range(preview_list) %}
-            <li><a href="{{ url_for('get_cheese', cheese_id=c) }}">{{ cheeses[c].name }}</a> </li>
-          {% endfor %}
-          {% if more_cheese %}
-            <li><a href="{{ url_for('get_cheeses', type_id=t.id) }}">More {{ t.name }} </a> </li>
-          {% endif %}
-        </ul>
+        <li><a href="{{ url_for('get_cheeses', type_id=t.id) }}">{{ t.name }}</a></li>
       {% endfor %}
     </ul>
 
