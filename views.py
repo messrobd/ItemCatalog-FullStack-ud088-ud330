@@ -2,7 +2,9 @@
 from flask import \
     Flask, \
     render_template, \
-    url_for
+    url_for, \
+    request, \
+    redirect
 from models import \
     Base, \
     Type, \
@@ -37,6 +39,15 @@ def get_filtered_items(session, kind, **filter_args):
 def get_item(session, kind, **filter_args):
     return session.query(kind).filter_by(**filter_args).one()
 
+@db_operation
+def add_item(session, kind, **properties):
+    props = {**properties}
+    print(props)
+    new_item = kind(**properties)
+    session.add(new_item)
+    session.commit()
+
+
 # page view handlers
 @app.route('/')
 @app.route('/catalog')
@@ -58,13 +69,22 @@ def get_cheese(cheese_id):
     cheese = get_item(Cheese, id=cheese_id)
     return render_template('cheese.html', cheese=cheese)
 
-@app.route('/catalog/cheese/new')
+@app.route('/catalog/cheese/new', methods=['GET', 'POST'])
 def new_cheese():
-    types = get_items(Type)
-    milks = get_items(Milk)
-    return render_template('new_cheese.html', \
-        types=types, \
-        milks=milks)
+    if request.method == 'GET':
+        types = get_items(Type)
+        milks = get_items(Milk)
+        return render_template('new_cheese.html', \
+            types=types, \
+            milks=milks)
+    elif request.method == 'POST':
+        add_item(Cheese, \
+            name=request.form['name'], \
+            type_id=int(request.form['type']), \
+            description=request.form['description'], \
+            milk_id=int(request.form['milk']), \
+            place=request.form['place'])
+        return redirect(url_for('get_index'))
 
 @app.route('/catalog/cheese/<int:cheese_id>/edit')
 def edit_cheese(cheese_id):

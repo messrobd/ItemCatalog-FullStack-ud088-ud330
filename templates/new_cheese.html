@@ -13,7 +13,7 @@
       <label>Type:
         <select name="type">
           {% for t in types %}
-            <option value="{{ t.name  }}">{{ t.name  }}</option>
+            <option value="{{ t.id  }}">{{ t.name  }}</option>
           {% endfor %}
         </select>
       </label>
@@ -23,7 +23,7 @@
       <label>Milk:
         <select name="milk">
           {% for m in milks %}
-            <option value="{{ m.name  }}">{{ m.name  }}</option>
+            <option value="{{ m.id  }}">{{ m.name  }}</option>
           {% endfor %}
         </select>
       </label>
