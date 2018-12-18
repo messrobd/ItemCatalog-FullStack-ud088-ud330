@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys 
+import sys
 from sqlalchemy import \
     Column, \
     ForeignKey, \
@@ -52,6 +52,13 @@ class Cheese(Base):
 
     type = relationship(Type)
     milk = relationship(Milk)
+
+    def update(self, properties):
+        self.name = properties['name']
+        self.description = properties['description']
+        self.place = properties['place']
+        self.type_id = properties['type_id']
+        self.milk_id = properties['milk_id']
 
 engine = create_engine('sqlite:///cheese.db')
 Base.metadata.create_all(engine)

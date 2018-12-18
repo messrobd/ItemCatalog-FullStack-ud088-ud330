@@ -41,12 +41,22 @@ def get_item(session, kind, **filter_args):
 
 @db_operation
 def add_item(session, kind, **properties):
-    props = {**properties}
-    print(props)
     new_item = kind(**properties)
     session.add(new_item)
     session.commit()
 
+@db_operation
+def edit_item(session, kind, id, **properties):
+    item = get_item(kind, id=id)
+    item.update(properties)
+    session.add(item)
+    session.commit()
+
+@db_operation
+def delete_item(session, kind, id):
+    item = get_item(kind, id=id)
+    session.delete(item)
+    session.commit()
 
 # page view handlers
 @app.route('/')
@@ -86,20 +96,34 @@ def new_cheese():
             place=request.form['place'])
         return redirect(url_for('get_index'))
 
-@app.route('/catalog/cheese/<int:cheese_id>/edit')
+@app.route('/catalog/cheese/<int:cheese_id>/edit', methods=['GET', 'POST'])
 def edit_cheese(cheese_id):
-    cheese = get_item(Cheese, id=cheese_id)
-    types = get_items(Type)
-    milks = get_items(Milk)
-    return render_template('edit_cheese.html', \
-        cheese=cheese, \
-        types=types, \
-        milks=milks)
+    if request.method == 'GET':
+        cheese = get_item(Cheese, id=cheese_id)
+        types = get_items(Type)
+        milks = get_items(Milk)
+        return render_template('edit_cheese.html', \
+            cheese=cheese, \
+            types=types, \
+            milks=milks)
+    elif request.method == 'POST':
+        edit_item(Cheese, cheese_id, \
+            name=request.form['name'], \
+            type_id=int(request.form['type']), \
+            description=request.form['description'], \
+            milk_id=int(request.form['milk']), \
+            place=request.form['place'])
+        return redirect(url_for('get_cheese', cheese_id=cheese_id))
 
-@app.route('/catalog/cheese/<int:cheese_id>/delete')
+
+@app.route('/catalog/cheese/<int:cheese_id>/delete', methods=['GET', 'POST'])
 def delete_cheese(cheese_id):
-    cheese = get_item(Cheese, id=cheese_id)
-    return render_template('delete_cheese.html', cheese=cheese)
+    if request.method == 'GET':
+        cheese = get_item(Cheese, id=cheese_id)
+        return render_template('delete_cheese.html', cheese=cheese)
+    elif request.method == 'POST':
+        delete_item(Cheese, id=cheese_id)
+        return redirect(url_for('get_index'))
 
 @app.route('/login')
 def login():

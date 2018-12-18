@@ -14,9 +14,9 @@
         <select name="type">
           {% for t in types %}
             {% if t.id == cheese.type_id %}
-              <option value="{{ t.name  }}" selected>{{ t.name  }}</option>
+              <option value="{{ t.id  }}" selected>{{ t.name  }}</option>
             {% else %}
-              <option value="{{ t.name  }}">{{ t.name  }}</option>
+              <option value="{{ t.id  }}">{{ t.name  }}</option>
             {% endif %}
           {% endfor %}
         </select>
@@ -28,9 +28,9 @@
         <select name="milk">
           {% for m in milks %}
             {% if m.id == cheese.milk_id %}
-              <option value="{{ m.name  }}" selected>{{ m.name  }}</option>
+              <option value="{{ m.id  }}" selected>{{ m.name  }}</option>
             {% else %}
-              <option value="{{ m.name  }}">{{ m.name  }}</option>
+              <option value="{{ m.id  }}">{{ m.name  }}</option>
             {% endif %}
           {% endfor %}
         </select>

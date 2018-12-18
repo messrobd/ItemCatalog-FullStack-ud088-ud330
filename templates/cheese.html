@@ -8,6 +8,8 @@
     <div class="cheese">
       <div class="cheese-heading">
         <h1>{{ cheese.name }}</h1>
+        <p>{{ cheese.description }}</p>
+        <p>{{ cheese.place }}</p>
         <form class="cheese-actions">
           <input type="button" name="edit" onclick="location.href='{{ url_for('edit_cheese', cheese_id=cheese.id) }}'" value="Edit">
           <input type="button" name="delete" onclick="location.href='{{ url_for('delete_cheese', cheese_id=cheese.id) }}'" value="Delete">
