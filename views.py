@@ -4,7 +4,8 @@ from flask import \
     render_template, \
     url_for, \
     request, \
-    redirect
+    redirect, \
+    session as app_session
 from models import \
     Base, \
     Type, \
@@ -132,5 +133,6 @@ def login():
 
 # start serving
 if __name__ == '__main__':
+    app.secret_key = b'B\xe8\xa5\xba\xedk=\x1al@x\xd5\xa8\xbf\xe8f'
     app.debug = True
     app.run(host='0.0.0.0', port=5000)
