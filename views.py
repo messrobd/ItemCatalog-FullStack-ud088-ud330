@@ -13,6 +13,7 @@ from models import \
     Cheese
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from oauth2client.client import flow_from_clientsecrets
 
 app = Flask(__name__)
 engine = create_engine('sqlite:///cheese.db')
@@ -128,7 +129,22 @@ def delete_cheese(cheese_id):
 
 @app.route('/login')
 def login():
-    return 'login'
+    return render_template('login.html')
+
+@app.route('/storeauthcode', methods=['POST'])
+def store_authcode():
+    secret = 'static/client_secret.json'
+    # get auth code from ajax request object
+    auth_code = request.data
+    # create a flow object from the client info in the secret
+    oauth_flow = flow_from_clientsecrets(\
+        secret, \
+        scope='', \
+        redirect_uri='postmessage')
+    # exchange auth code for credentials
+    credentials = oauth_flow.step2_exchange(auth_code)
+
+    return 'holy shit it worked'
 
 
 # start serving
