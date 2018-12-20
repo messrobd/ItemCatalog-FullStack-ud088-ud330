@@ -11,6 +11,18 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+# Classes
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(
+        Integer,
+        primary_key = True
+    )
+    email = Column(
+        String,
+        nullable = False
+    )
+
 class Type(Base):
     __tablename__ = 'type'
     id = Column(
@@ -22,6 +34,13 @@ class Type(Base):
         nullable = False
     )
     description = Column(String)
+    user_id = Column(
+        Integer,
+        ForeignKey('user.id'),
+        nullable = False
+    )
+
+    user = relationship(User)
 
 class Milk(Base):
     __tablename__ = 'milk'
@@ -33,6 +52,13 @@ class Milk(Base):
         String,
         nullable = False
     )
+    user_id = Column(
+        Integer,
+        ForeignKey('user.id'),
+        nullable = False
+    )
+
+    user = relationship(User)
 
 class Cheese(Base):
     __tablename__ = 'cheese'
@@ -47,11 +73,25 @@ class Cheese(Base):
     description = Column(String)
     place = Column(String)
     image = Column(String)
-    type_id = Column(ForeignKey('type.id'))
-    milk_id = Column(ForeignKey('milk.id'))
+    type_id = Column(
+        Integer,
+        ForeignKey('type.id'),
+        nullable = False
+    )
+    milk_id = Column(
+        Integer,
+        ForeignKey('milk.id'),
+        nullable = False
+    )
+    user_id = Column(
+        Integer,
+        ForeignKey('user.id'),
+        nullable = False
+    )
 
     type = relationship(Type)
     milk = relationship(Milk)
+    user = relationship(User)
 
     def update(self, properties):
         self.name = properties['name']
@@ -60,5 +100,6 @@ class Cheese(Base):
         self.type_id = properties['type_id']
         self.milk_id = properties['milk_id']
 
+# initialisation
 engine = create_engine('sqlite:///cheese.db')
 Base.metadata.create_all(engine)

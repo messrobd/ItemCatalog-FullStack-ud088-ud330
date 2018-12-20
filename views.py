@@ -5,14 +5,17 @@ from flask import \
     url_for, \
     request, \
     redirect, \
-    session as app_session
+    session as login_session
 from models import \
     Base, \
+    User, \
     Type, \
     Milk, \
     Cheese
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import \
+    sessionmaker, \
+    exc
 from oauth2client.client import flow_from_clientsecrets
 import requests
 
@@ -40,7 +43,10 @@ def get_filtered_items(session, kind, **filter_args):
 
 @db_operation
 def get_item(session, kind, **filter_args):
-    return session.query(kind).filter_by(**filter_args).one()
+    try:
+        return session.query(kind).filter_by(**filter_args).one()
+    except exc.NoResultFound:
+        return None
 
 @db_operation
 def add_item(session, kind, **properties):
@@ -61,18 +67,35 @@ def delete_item(session, kind, id):
     session.delete(item)
     session.commit()
 
+@db_operation
+def create_user(session, email):
+    new_user = User(email=email)
+    session.add(new_user)
+    session.commit()
+    user = session.query(User).filter_by(email=email).one()
+    return user.id
+
+@db_operation
+def get_user_id(session, email):
+    try:
+        user = session.query(User).filter_by(email=email).one()
+        return user.id
+    except exc.NoResultFound:
+        return None
+
+
 # page view handlers
 @app.route('/')
 @app.route('/catalog')
 def get_index():
     types = get_items(Type)
+    user_id = login_session.get('user_id')
     return render_template('catalog.html', types=types)
 
 @app.route('/catalog/type/<int:type_id>')
 def get_cheeses(type_id):
     type = get_item(Type, id=type_id)
     cheeses_of_type = get_filtered_items(Cheese, type_id=type_id)
-    print('query executed')
     return render_template('cheeses.html', \
         type=type, \
         cheeses=cheeses_of_type)
@@ -148,8 +171,25 @@ def store_authcode():
     userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
     params = {'access_token': credentials.access_token, 'alt': 'json'}
     user_info = requests.get(userinfo_url, params=params).json()
+    # if the user is stored, log them in, else store them and log them in
+    registered_user_id = get_user_id(user_info['email']) \
+        or create_user(user_info['email'])
+    login_session['user_id'] = registered_user_id
 
     return user_info['name']
+
+@app.route('/testdb')
+@db_operation
+def get_users(session):
+    output = ''
+    i = 0
+    for u in session.query(User).all():
+        output += str(u.id)
+        output += u.email
+        output += '</br>'
+        i += 1
+    output += str(i)
+    return output
 
 
 # start serving

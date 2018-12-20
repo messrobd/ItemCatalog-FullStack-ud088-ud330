@@ -2,3 +2,4 @@
 .DS_STORE
 tasks.txt
 __pycache__
+*.pyc
