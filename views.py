@@ -104,10 +104,17 @@ def get_cheeses(type_id):
 @app.route('/catalog/cheese/<int:cheese_id>')
 def get_cheese(cheese_id):
     cheese = get_item(Cheese, id=cheese_id)
-    return render_template('cheese.html', cheese=cheese)
+    cheese_creator = cheese.user_id
+    loggedin_user = login_session.get('user_id')
+    can_edit = cheese_creator == loggedin_user
+    return render_template('cheese.html', \
+        can_edit=can_edit, \
+        cheese=cheese)
 
 @app.route('/catalog/cheese/new', methods=['GET', 'POST'])
 def new_cheese():
+    if not login_session.get('user_id'):
+        return redirect(url_for('login'))
     if request.method == 'GET':
         types = get_items(Type)
         milks = get_items(Milk)
@@ -126,8 +133,12 @@ def new_cheese():
 
 @app.route('/catalog/cheese/<int:cheese_id>/edit', methods=['GET', 'POST'])
 def edit_cheese(cheese_id):
+    cheese = get_item(Cheese, id=cheese_id)
+    cheese_creator = cheese.user_id
+    loggedin_user = login_session.get('user_id')
+    if cheese_creator != loggedin_user:
+        return redirect(url_for('login'))
     if request.method == 'GET':
-        cheese = get_item(Cheese, id=cheese_id)
         types = get_items(Type)
         milks = get_items(Milk)
         return render_template('edit_cheese.html', \
@@ -145,8 +156,12 @@ def edit_cheese(cheese_id):
 
 @app.route('/catalog/cheese/<int:cheese_id>/delete', methods=['GET', 'POST'])
 def delete_cheese(cheese_id):
+    cheese = get_item(Cheese, id=cheese_id)
+    cheese_creator = cheese.user_id
+    loggedin_user = login_session.get('user_id')
+    if cheese_creator != loggedin_user:
+        return redirect(url_for('login'))
     if request.method == 'GET':
-        cheese = get_item(Cheese, id=cheese_id)
         return render_template('delete_cheese.html', cheese=cheese)
     elif request.method == 'POST':
         delete_item(Cheese, id=cheese_id)
