@@ -14,6 +14,7 @@ from models import \
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from oauth2client.client import flow_from_clientsecrets
+import requests
 
 app = Flask(__name__)
 engine = create_engine('sqlite:///cheese.db')
@@ -143,8 +144,12 @@ def store_authcode():
         redirect_uri='postmessage')
     # exchange auth code for credentials
     credentials = oauth_flow.step2_exchange(auth_code)
+    # get user info from google
+    userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+    params = {'access_token': credentials.access_token, 'alt': 'json'}
+    user_info = requests.get(userinfo_url, params=params).json()
 
-    return 'holy shit it worked'
+    return user_info['name']
 
 
 # start serving
