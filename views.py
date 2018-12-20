@@ -83,14 +83,15 @@ def get_user_id(session, email):
     except exc.NoResultFound:
         return None
 
-
 # page view handlers
 @app.route('/')
 @app.route('/catalog')
 def get_index():
     types = get_items(Type)
-    user_id = login_session.get('user_id')
-    return render_template('catalog.html', types=types)
+    user_name = login_session.get('user_name')
+    return render_template('catalog.html', \
+        user_name=user_name, \
+        types=types)
 
 @app.route('/catalog/type/<int:type_id>')
 def get_cheeses(type_id):
@@ -155,8 +156,9 @@ def delete_cheese(cheese_id):
 def login():
     return render_template('login.html')
 
-@app.route('/storeauthcode', methods=['POST'])
-def store_authcode():
+@app.route('/gconnect', methods=['POST'])
+def gconnect():
+    # load the secret
     secret = 'static/client_secret.json'
     # get auth code from ajax request object
     auth_code = request.data
@@ -174,9 +176,25 @@ def store_authcode():
     # if the user is stored, log them in, else store them and log them in
     registered_user_id = get_user_id(user_info['email']) \
         or create_user(user_info['email'])
+    # populate login session with user data
     login_session['user_id'] = registered_user_id
+    login_session['user_name'] = user_info['name']
+    login_session['access_token'] = credentials.access_token
 
     return user_info['name']
+
+@app.route('/gdisconnect')
+def gdisconnect():
+    # build url to google revocation service
+    revocation_url = 'https://accounts.google.com/o/oauth2/revoke?token=' \
+        + login_session['access_token']
+    # get response from revocation service
+    revocation_result = requests.get(revocation_url).status_code
+    del login_session['user_id']
+    del login_session['user_name']
+    del login_session['access_token']
+    return redirect(url_for('get_index'))
+
 
 @app.route('/testdb')
 @db_operation
@@ -190,7 +208,6 @@ def get_users(session):
         i += 1
     output += str(i)
     return output
-
 
 # start serving
 if __name__ == '__main__':

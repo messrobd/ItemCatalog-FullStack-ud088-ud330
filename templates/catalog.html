@@ -6,15 +6,21 @@
   </head>
   <body>
     <div class="login-status">
-      <form class="create-cheese">
-        <input type="button" name="login" onclick="window.location.href='{{ url_for('login') }}'" value="Log in">
-      </form>
+      {% if user_name %}
+        <a href="/gdisconnect">Logout {{ user_name }}</a>
+      {% else %}
+        <form class="login">
+          <input type="button" name="login" onclick="window.location.href='{{ url_for('login') }}'" value="Log in">
+        </form>
+      {% endif %}
     </div>
     <div class="catalog-heading">
       <h1>Cheeses</h1>
-      <form class="create-cheese">
-        <input type="button" name="create" onclick="window.location.href='{{ url_for('new_cheese') }}'" value="Create new cheese">
-      </form>
+      {% if user_name %}
+        <form class="create-cheese">
+          <input type="button" name="create" onclick="window.location.href='{{ url_for('new_cheese') }}'" value="Create new cheese">
+        </form>
+      {% endif %}
     </div>
     <ul class="types">
       {% for t in types %}
