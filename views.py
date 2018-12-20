@@ -120,7 +120,8 @@ def new_cheese():
             type_id=int(request.form['type']), \
             description=request.form['description'], \
             milk_id=int(request.form['milk']), \
-            place=request.form['place'])
+            place=request.form['place'], \
+            user_id=login_session['user_id'])
         return redirect(url_for('get_index'))
 
 @app.route('/catalog/cheese/<int:cheese_id>/edit', methods=['GET', 'POST'])
@@ -141,7 +142,6 @@ def edit_cheese(cheese_id):
             milk_id=int(request.form['milk']), \
             place=request.form['place'])
         return redirect(url_for('get_cheese', cheese_id=cheese_id))
-
 
 @app.route('/catalog/cheese/<int:cheese_id>/delete', methods=['GET', 'POST'])
 def delete_cheese(cheese_id):
@@ -201,9 +201,9 @@ def gdisconnect():
 def get_users(session):
     output = ''
     i = 0
-    for u in session.query(User).all():
+    for u in session.query(Cheese).all():
         output += str(u.id)
-        output += u.email
+        output += str(u.__dict__)
         output += '</br>'
         i += 1
     output += str(i)
