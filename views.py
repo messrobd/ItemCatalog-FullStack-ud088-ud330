@@ -5,7 +5,8 @@ from flask import \
     url_for, \
     request, \
     redirect, \
-    session as login_session
+    session as login_session, \
+    jsonify
 from models import \
     Base, \
     User, \
@@ -25,6 +26,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 # db operations
+# cheese
 def db_operation(operation):
     def decorator(*args, **kwargs):
         session = DBSession()
@@ -57,7 +59,7 @@ def add_item(session, kind, **properties):
 @db_operation
 def edit_item(session, kind, id, **properties):
     item = get_item(kind, id=id)
-    item.update(properties)
+    item.object(properties)
     session.add(item)
     session.commit()
 
@@ -67,6 +69,7 @@ def delete_item(session, kind, id):
     session.delete(item)
     session.commit()
 
+# users
 @db_operation
 def create_user(session, email):
     new_user = User(email=email)
@@ -83,7 +86,8 @@ def get_user_id(session, email):
     except exc.NoResultFound:
         return None
 
-# page view handlers
+# request handlers
+# page views
 @app.route('/')
 @app.route('/catalog')
 def get_index():
@@ -171,6 +175,16 @@ def delete_cheese(cheese_id):
 def login():
     return render_template('login.html')
 
+# json endpoints
+@app.route('/api/v1/cheeses')
+def get_cheeses_json():
+    return jsonify(cheeses=[c.object for c in get_items(Cheese)])
+
+@app.route('/api/v1/cheese/<int:cheese_id>')
+def get_cheese_json(cheese_id):
+    return jsonify(get_item(Cheese, id=cheese_id).object)
+
+# authorisation flow
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # load the secret
@@ -210,7 +224,7 @@ def gdisconnect():
     del login_session['access_token']
     return redirect(url_for('get_index'))
 
-
+# testing
 @app.route('/testdb')
 @db_operation
 def get_users(session):
