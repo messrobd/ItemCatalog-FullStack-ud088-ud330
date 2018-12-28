@@ -18,12 +18,18 @@ from sqlalchemy.orm import \
     sessionmaker, \
     exc
 from oauth2client.client import flow_from_clientsecrets
+from google.oauth2 import id_token
+from google.auth.transport import requests as auth_requests
 import requests
+import json
 
 app = Flask(__name__)
 engine = create_engine('sqlite:///cheese.db')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
+
+CLIENT_ID = json.loads(
+    open('static/client_secret.json', 'r').read())['web']['client_id']
 
 # db operations
 # cheese
@@ -93,8 +99,9 @@ def get_user_id(session, email):
 def get_index():
     types = get_items(Type)
     user_name = login_session.get('user_name')
-    return render_template('catalog.html', \
-        user_name=user_name, \
+    return render_template('catalog.html',
+        client_id=CLIENT_ID,
+        user_name=user_name,
         types=types)
 
 @app.route('/catalog/type/<int:type_id>')
@@ -111,8 +118,8 @@ def get_cheese(cheese_id):
     cheese_creator = cheese.user_id
     loggedin_user = login_session.get('user_id')
     can_edit = cheese_creator == loggedin_user
-    return render_template('cheese.html', \
-        can_edit=can_edit, \
+    return render_template('cheese.html',
+        can_edit=can_edit,
         cheese=cheese)
 
 @app.route('/catalog/cheese/new', methods=['GET', 'POST'])
@@ -173,7 +180,9 @@ def delete_cheese(cheese_id):
 
 @app.route('/login')
 def login():
-    return render_template('login.html')
+    client_id = json.loads(
+        open('static/client_secret.json', 'r').read())['web']['client_id']
+    return render_template('login.html', client_id=client_id)
 
 # json endpoints
 @app.route('/api/v1/cheeses')
@@ -187,7 +196,7 @@ def get_cheese_json(cheese_id):
 # authorisation flow
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
-    # load the secret
+    # point to the secret file
     secret = 'static/client_secret.json'
     # get auth code from ajax request object
     auth_code = request.data
@@ -200,7 +209,10 @@ def gconnect():
     credentials = oauth_flow.step2_exchange(auth_code)
     # get user info from google
     userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
-    params = {'access_token': credentials.access_token, 'alt': 'json'}
+    params = {
+        'access_token': credentials.access_token,
+        'alt': 'json'
+        }
     user_info = requests.get(userinfo_url, params=params).json()
     # if the user is stored, log them in, else store them and log them in
     registered_user_id = get_user_id(user_info['email']) \
@@ -222,6 +234,33 @@ def gdisconnect():
     del login_session['user_id']
     del login_session['user_name']
     del login_session['access_token']
+    return redirect(url_for('get_index'))
+
+@app.route('/tokensignin', methods=['POST'])
+def tokensignin():
+    token_in = request.data
+    client_id = json.loads(
+        open('static/client_secret.json', 'r').read())['web']['client_id']
+    try:
+        id_info = id_token.verify_oauth2_token(
+            token_in,
+            auth_requests.Request(),
+            client_id)
+        if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+            raise ValueError('wrong issuer')
+    except ValueError:
+        pass
+    else:
+        registered_user_id = get_user_id(id_info['email']) \
+            or create_user(id_info['email'])
+        login_session['user_id'] = registered_user_id
+        login_session['user_name'] = id_info['name']
+        return id_info['name']
+
+@app.route('/signout')
+def sign_out():
+    del login_session['user_id']
+    del login_session['user_name']
     return redirect(url_for('get_index'))
 
 # testing
