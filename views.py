@@ -17,7 +17,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import \
     sessionmaker, \
     exc
-from oauth2client.client import flow_from_clientsecrets
 from google.oauth2 import id_token
 from google.auth.transport import requests as auth_requests
 import requests
@@ -180,9 +179,7 @@ def delete_cheese(cheese_id):
 
 @app.route('/login')
 def login():
-    client_id = json.loads(
-        open('static/client_secret.json', 'r').read())['web']['client_id']
-    return render_template('login.html', client_id=client_id)
+    return render_template('login.html', client_id=CLIENT_ID)
 
 # json endpoints
 @app.route('/api/v1/cheeses')
@@ -194,48 +191,6 @@ def get_cheese_json(cheese_id):
     return jsonify(get_item(Cheese, id=cheese_id).object)
 
 # authorisation flow
-@app.route('/gconnect', methods=['POST'])
-def gconnect():
-    # point to the secret file
-    secret = 'static/client_secret.json'
-    # get auth code from ajax request object
-    auth_code = request.data
-    # create a flow object from the client info in the secret
-    oauth_flow = flow_from_clientsecrets(\
-        secret, \
-        scope='', \
-        redirect_uri='postmessage')
-    # exchange auth code for credentials
-    credentials = oauth_flow.step2_exchange(auth_code)
-    # get user info from google
-    userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
-    params = {
-        'access_token': credentials.access_token,
-        'alt': 'json'
-        }
-    user_info = requests.get(userinfo_url, params=params).json()
-    # if the user is stored, log them in, else store them and log them in
-    registered_user_id = get_user_id(user_info['email']) \
-        or create_user(user_info['email'])
-    # populate login session with user data
-    login_session['user_id'] = registered_user_id
-    login_session['user_name'] = user_info['name']
-    login_session['access_token'] = credentials.access_token
-
-    return user_info['name']
-
-@app.route('/gdisconnect')
-def gdisconnect():
-    # build url to google revocation service
-    revocation_url = 'https://accounts.google.com/o/oauth2/revoke?token=' \
-        + login_session['access_token']
-    # get response from revocation service
-    revocation_result = requests.get(revocation_url).status_code
-    del login_session['user_id']
-    del login_session['user_name']
-    del login_session['access_token']
-    return redirect(url_for('get_index'))
-
 @app.route('/tokensignin', methods=['POST'])
 def tokensignin():
     token_in = request.data

@@ -8,17 +8,12 @@
     <!-- import jquery pre-requisite for google auth flow sample code -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <!-- import google platform API pre-requisite for google auth flow -->
-    <!-- and call start() function (below) -->
     <script src="https://apis.google.com/js/platform.js" async defer></script>
   </head>
   <body>
+    <!-- Google signin component --> 
     <div class="g-signin2" data-onsuccess="onSuccess">
-      <script>
-        function grantOffline() {
-          // signInCallback defined below
-          gapi.auth2.getAuthInstance().grantOfflineAccess().then(signInCallback);
-        }
-      </script>
+
     </div>
     <div id="result">
 
@@ -27,8 +22,6 @@
     <script>
       function onSuccess(googleUser) {
           let id_token = googleUser.getAuthResponse().id_token;
-          //let profile = googleUser.getBasicProfile();
-          //console.log(id_token);
           $.ajax({
             type: 'POST',
             url: '/tokensignin',
@@ -41,45 +34,8 @@
               }, 4000);
             }
           });
-      };
-
-      function signInCallback(authResult) {
-        if (authResult['code']) {
-          // Hide the sign-in button now that the user is authorized, for example:
-          $('#signinButton').attr('style', 'display: none');
-          // Send the code to the server
-          $.ajax({
-            type: 'POST',
-            url: '/gconnect',
-            // Always include an `X-Requested-With` header in every AJAX request,
-            // to protect against CSRF attacks.
-            headers: {
-              'X-Requested-With': 'XMLHttpRequest'
-            },
-            contentType: 'application/octet-stream; charset=utf-8',
-            success: function(result) {
-              if (result) {
-                $('#result').html('login successful</br>'
-                  + result
-                  + '</br>redirecting');
-                setTimeout(function() {
-                  window.location.href = '/';
-                }, 4000);
-              }
-            },
-            processData: false,
-            data: authResult['code']
-          });
-        } else {
-          // There was an error.
-        }
       }
 
-      function renderGSignIn() {
-        gapi.signin2.render('my-g-signin2', {
-          onsuccess: onSuccess
-        });
-      }
     </script>
   </body>
 </html>
