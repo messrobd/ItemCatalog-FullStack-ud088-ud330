@@ -17,7 +17,12 @@
     </div>
     <ul class="types">
       {% for t in types %}
-        <li><a href="{{ url_for('get_cheeses', type_id=t.id) }}">{{ t.name }}</a></li>
+        <li>{{ t['name'] }}</li>
+        <ul>
+          {% for c in t['cheeses'] %}
+            <li>{{ c.name }}</li>
+          {% endfor %}
+        </ul>
       {% endfor %}
     </ul>
 

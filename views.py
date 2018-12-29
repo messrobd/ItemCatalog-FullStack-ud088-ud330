@@ -46,7 +46,7 @@ def get_items(session, kind):
 
 @db_operation
 def get_filtered_items(session, kind, **filter_args):
-    return session.query(kind).filter_by(**filter_args)
+    return session.query(kind).filter_by(**filter_args).all()
 
 @db_operation
 def get_item(session, kind, **filter_args):
@@ -98,10 +98,14 @@ def get_user_id(session, email):
 def get_index():
     user_name = login_session.get('user_name')
     types = get_items(Type)
+    types_catalog = [{
+            'name': t.name,
+            'cheeses': get_filtered_items(Cheese, type_id=t.id)
+        } for t in types]
     return render_template('catalog.html',
         client_id=CLIENT_ID,
         user_name=user_name,
-        types=types)
+        types=types_catalog)
 
 @app.route('/catalog/type/<int:type_id>')
 def get_cheeses(type_id):
