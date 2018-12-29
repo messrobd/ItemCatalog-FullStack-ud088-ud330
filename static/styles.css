@@ -9,11 +9,22 @@ input[type="button"] {
 }
 .signin-status {
   display: flex;
-  flex-flow: row-reverse;
+  flex-direction: row-reverse;
   font-size: 11px;
 }
 .catalog-heading {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+}
+#signin-dialog, .g-signin2, #result {
+  width: fit-content;
+  margin: 0 auto;
+}
+#signin-dialog {
+  padding-top: 25%;
+}
+#result {
+  font-size: 13px;
+  padding-top: 13px;
 }

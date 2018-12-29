@@ -11,11 +11,14 @@
     <script src="https://apis.google.com/js/platform.js" async defer></script>
   </head>
   <body>
-    <!-- Google signin component --> 
-    <div class="g-signin2" data-onsuccess="onSuccess">
+    <div id="signin-dialog">
+      <!-- Google signin component -->
+      <div class="g-signin2" data-onsuccess="onSuccess">
 
-    </div>
-    <div id="result">
+      </div>
+      <div id="result">
+
+      </div>
 
     </div>
     <!-- callback function for Google sign-in, invoked by auth2 object -->
@@ -31,7 +34,7 @@
               $('#result').html('Welcome, ' + result);
               setTimeout(function() {
                 window.location.href = '/';
-              }, 4000);
+              }, 3000);
             }
           });
       }
