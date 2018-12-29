@@ -4,34 +4,20 @@
     <meta charset="utf-8">
     <title>Cheese catalog</title>
     <link rel="stylesheet" href="/static/styles.css">
-    <script src="https://apis.google.com/js/platform.js?onload=start" async defer></script>
-    <script>
-      function start() {
-        gapi.load('auth2', function() {
-          auth2 = gapi.auth2.init({
-            client_id: '{{ client_id }}'
-          });
-        });
-      }
-    </script>
   </head>
   <body>
-    <div class="login-status">
+    <div class="signin-status">
       {% if user_name %}
-        <a href="" onclick="signout();">Sign out {{ user_name }}</a>
+        <form class="signout">
+          <label>{{ user_name }}
+            <input type="button" name="signout" onclick="window.location.href='{{ url_for('sign_out') }}'" value="Sign out">
+          </label>
+        </form>
       {% else %}
-        <form class="login">
-          <input type="button" name="login" onclick="window.location.href='{{ url_for('login') }}'" value="Sign in">
+        <form class="signin">
+          <input type="button" name="signin" onclick="window.location.href='{{ url_for('login') }}'" value="Sign in">
         </form>
       {% endif %}
-      <script>
-        function signout() {
-          console.log('callback');
-          auth2.signOut().then(function() {
-            window.location.href="{{ url_for('sign_out') }}";
-          });
-        }
-      </script>
     </div>
     <div class="catalog-heading">
       <h1>Cheeses</h1>
