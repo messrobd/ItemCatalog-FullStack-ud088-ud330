@@ -132,8 +132,10 @@ def new_cheese():
     if request.method == 'GET':
         types = get_items(Type)
         milks = get_items(Milk)
-        return render_template('new_cheese.html', \
-            types=types, \
+        preset_type = int(request.args.get('type')) if request.args else None
+        return render_template('new_cheese.html',
+            types=types,
+            preset_type=preset_type,
             milks=milks)
     elif request.method == 'POST':
         add_item(Cheese, \

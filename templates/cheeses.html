@@ -7,8 +7,13 @@
   </head>
   <body>
     {% include 'partials/signin_status.html' %}
-    <div class="type-heading">
+    <div class="heading">
       <h1>{{ type.name }}</h1>
+      {% if user_name %}
+        <form class="create-cheese">
+          <input type="button" name="create" onclick="window.location.href='{{ url_for('new_cheese', type=type.id) }}'" value="Create new cheese">
+        </form>
+      {% endif %}
     </div>
     <div class="type-description">
       {{ type.description }}

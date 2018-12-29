@@ -12,7 +12,7 @@ input[type="button"] {
   flex-direction: row-reverse;
   font-size: 11px;
 }
-.catalog-heading {
+.heading {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
