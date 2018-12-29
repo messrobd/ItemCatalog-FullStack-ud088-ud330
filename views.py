@@ -96,8 +96,8 @@ def get_user_id(session, email):
 @app.route('/')
 @app.route('/catalog')
 def get_index():
-    types = get_items(Type)
     user_name = login_session.get('user_name')
+    types = get_items(Type)
     return render_template('catalog.html',
         client_id=CLIENT_ID,
         user_name=user_name,
@@ -105,19 +105,23 @@ def get_index():
 
 @app.route('/catalog/type/<int:type_id>')
 def get_cheeses(type_id):
+    user_name = login_session.get('user_name')
     type = get_item(Type, id=type_id)
     cheeses_of_type = get_filtered_items(Cheese, type_id=type_id)
     return render_template('cheeses.html', \
+        user_name=user_name,
         type=type, \
         cheeses=cheeses_of_type)
 
 @app.route('/catalog/cheese/<int:cheese_id>')
 def get_cheese(cheese_id):
+    loggedin_user = login_session.get('user_id')
+    user_name = login_session.get('user_name')
     cheese = get_item(Cheese, id=cheese_id)
     cheese_creator = cheese.user_id
-    loggedin_user = login_session.get('user_id')
     can_edit = cheese_creator == loggedin_user
     return render_template('cheese.html',
+        user_name=user_name,
         can_edit=can_edit,
         cheese=cheese)
 
@@ -179,7 +183,10 @@ def delete_cheese(cheese_id):
 
 @app.route('/login')
 def login():
-    return render_template('login.html', client_id=CLIENT_ID)
+    referer = request.headers['Referer']
+    return render_template('login.html',
+        client_id=CLIENT_ID,
+        referer=referer)
 
 # json endpoints
 @app.route('/api/v1/cheeses')
@@ -214,9 +221,10 @@ def tokensignin():
 
 @app.route('/signout')
 def sign_out():
+    referer = request.headers['Referer']
     del login_session['user_id']
     del login_session['user_name']
-    return redirect(url_for('get_index'))
+    return redirect(referer)
 
 # testing
 @app.route('/testdb')

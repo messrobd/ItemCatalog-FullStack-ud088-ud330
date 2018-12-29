@@ -6,19 +6,7 @@
     <link rel="stylesheet" href="/static/styles.css">
   </head>
   <body>
-    <div class="signin-status">
-      {% if user_name %}
-        <form class="signout">
-          <label>{{ user_name }}
-            <input type="button" name="signout" onclick="window.location.href='{{ url_for('sign_out') }}'" value="Sign out">
-          </label>
-        </form>
-      {% else %}
-        <form class="signin">
-          <input type="button" name="signin" onclick="window.location.href='{{ url_for('login') }}'" value="Sign in">
-        </form>
-      {% endif %}
-    </div>
+    {% include 'partials/signin_status.html' %}
     <div class="catalog-heading">
       <h1>Cheeses</h1>
       {% if user_name %}

@@ -1,0 +1,13 @@
+<div class="signin-status">
+  {% if user_name %}
+    <form class="signout">
+      <label>{{ user_name }}
+        <input type="button" name="signout" onclick="window.location.href='{{ url_for('sign_out') }}'" value="Sign out">
+      </label>
+    </form>
+  {% else %}
+    <form class="signin">
+      <input type="button" name="signin" onclick="window.location.href='{{ url_for('login') }}'" value="Sign in">
+    </form>
+  {% endif %}
+</div>
