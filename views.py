@@ -31,6 +31,7 @@ DBSession = sessionmaker(bind=engine)
 CLIENT_ID = json.loads(
     open('static/client_secret.json', 'r').read())['web']['client_id']
 
+
 # db operations
 # cheese
 #   1. session wrapper: scope each server request to a db session
@@ -43,12 +44,15 @@ def db_operation(operation):
         return output
     return session_wrapper
 
+
 #   2. CRUD functions
 def get_items(session, kind):
     return session.query(kind).all()
 
+
 def get_filtered_items(session, kind, **filter_args):
     return session.query(kind).filter_by(**filter_args).all()
+
 
 def get_item(session, kind, **filter_args):
     try:
@@ -56,11 +60,13 @@ def get_item(session, kind, **filter_args):
     except exc.NoResultFound:
         return None
 
+
 def add_item(session, kind, **properties):
     new_item = kind(**properties)
     session.add(new_item)
     session.commit()
     return item
+
 
 def edit_item(session, kind, id, **properties):
     item = get_item(session, kind, id=id)
@@ -68,10 +74,12 @@ def edit_item(session, kind, id, **properties):
     session.add(item)
     session.commit()
 
+
 def delete_item(session, kind, id):
     item = get_item(session, kind, id=id)
     session.delete(item)
     session.commit()
+
 
 # users
 def get_user_id(session, email):
@@ -80,6 +88,7 @@ def get_user_id(session, email):
         return user.id
     except exc.NoResultFound:
         return None
+
 
 # request handlers
 # page views
@@ -94,9 +103,10 @@ def get_index(db_session):
             'cheeses': get_filtered_items(db_session, Cheese, type_id=t.id)
         } for t in types]
     return render_template('catalog.html',
-        client_id=CLIENT_ID,
-        user_name=user_name,
-        types=types_catalog)
+                           client_id=CLIENT_ID,
+                           user_name=user_name,
+                           types=types_catalog)
+
 
 @app.route('/catalog/type/<int:type_id>')
 @db_operation
@@ -105,9 +115,10 @@ def get_cheeses(db_session, type_id):
     type = get_item(db_session, Type, id=type_id)
     cheeses_of_type = get_filtered_items(db_session, Cheese, type_id=type_id)
     return render_template('cheeses.html',
-        user_name=user_name,
-        type=type,
-        cheeses=cheeses_of_type)
+                           user_name=user_name,
+                           type=type,
+                           cheeses=cheeses_of_type)
+
 
 @app.route('/catalog/cheese/<int:cheese_id>')
 @db_operation
@@ -120,10 +131,11 @@ def get_cheese(db_session, cheese_id):
     cheese_creator = cheese.user_id
     can_edit = cheese_creator == loggedin_user
     return render_template('cheese.html',
-        can_edit=can_edit,
-        cheese=cheese,
-        type=type,
-        milk=milk)
+                           can_edit=can_edit,
+                           cheese=cheese,
+                           type=type,
+                           milk=milk)
+
 
 @app.route('/catalog/cheese/new', methods=['GET', 'POST'])
 @db_operation
@@ -135,19 +147,20 @@ def new_cheese(db_session):
         milks = get_items(db_session, Milk)
         preset_type = int(request.args.get('type')) if request.args else None
         return render_template('new_cheese.html',
-            types=types,
-            preset_type=preset_type,
-            milks=milks)
+                               types=types,
+                               preset_type=preset_type,
+                               milks=milks)
     elif request.method == 'POST':
         add_item(db_session, Cheese,
-            name=request.form['name'],
-            type_id=int(request.form['type']),
-            description=request.form['description'],
-            milk_id=int(request.form['milk']),
-            place=request.form['place'],
-            image=request.form['image'],
-            user_id=login_session['user_id'])
+                 name=request.form['name'],
+                 type_id=int(request.form['type']),
+                 description=request.form['description'],
+                 milk_id=int(request.form['milk']),
+                 place=request.form['place'],
+                 image=request.form['image'],
+                 user_id=login_session['user_id'])
         return redirect(url_for('get_index'))
+
 
 @app.route('/catalog/cheese/<int:cheese_id>/edit', methods=['GET', 'POST'])
 @db_operation
@@ -161,18 +174,19 @@ def edit_cheese(db_session, cheese_id):
         types = get_items(db_session, Type)
         milks = get_items(db_session, Milk)
         return render_template('edit_cheese.html',
-            cheese=cheese,
-            types=types,
-            milks=milks)
+                               cheese=cheese,
+                               types=types,
+                               milks=milks)
     elif request.method == 'POST':
         edit_item(db_session, Cheese, cheese_id,
-            name=request.form['name'],
-            type_id=int(request.form['type']),
-            description=request.form['description'],
-            milk_id=int(request.form['milk']),
-            place=request.form['place'],
-            image=request.form['image'])
+                  name=request.form['name'],
+                  type_id=int(request.form['type']),
+                  description=request.form['description'],
+                  milk_id=int(request.form['milk']),
+                  place=request.form['place'],
+                  image=request.form['image'])
         return redirect(url_for('get_cheese', cheese_id=cheese_id))
+
 
 @app.route('/catalog/cheese/<int:cheese_id>/delete', methods=['GET', 'POST'])
 @db_operation
@@ -189,24 +203,28 @@ def delete_cheese(db_session, cheese_id):
         delete_item(db_session, Cheese, id=cheese_id)
         return redirect(referer)
 
+
 @app.route('/login')
 def login():
     referer = request.headers['Referer']
     return render_template('login.html',
-        client_id=CLIENT_ID,
-        referer=referer)
+                           client_id=CLIENT_ID,
+                           referer=referer)
+
 
 # json endpoints
 @app.route('/api/v1/cheeses')
 @db_operation
 def get_cheeses_json(db_session):
-    return jsonify(cheeses=[c.serialize \
-        for c in get_items(db_session, Cheese)])
+    return \
+        jsonify(cheeses=[c.serialize for c in get_items(db_session, Cheese)])
+
 
 @app.route('/api/v1/cheese/<int:cheese_id>')
 @db_operation
 def get_cheese_json(db_session, cheese_id):
     return jsonify(get_item(db_session, Cheese, id=cheese_id).object)
+
 
 # authorisation flow
 @app.route('/tokensignin', methods=['POST'])
@@ -220,18 +238,19 @@ def tokensignin(db_session):
             token_in,
             auth_requests.Request(),
             client_id)
-        if id_info['iss'] not in [\
-            'accounts.google.com',
-            'https://accounts.google.com']:
+        if id_info['iss'] not in [
+                'accounts.google.com',
+                'https://accounts.google.com']:
             raise ValueError('wrong issuer')
     except ValueError:
         pass
     else:
         registered_user_id = get_user_id(db_session, id_info['email']) \
-            or add_item(db_session, User, email=id_info['email']).id
+                or add_item(db_session, User, email=id_info['email']).id
         login_session['user_id'] = registered_user_id
         login_session['user_name'] = id_info['name']
         return id_info['name']
+
 
 @app.route('/signout')
 def sign_out():
@@ -239,6 +258,7 @@ def sign_out():
     del login_session['user_id']
     del login_session['user_name']
     return redirect(referer)
+
 
 # testing
 @app.route('/testdb')
@@ -253,6 +273,7 @@ def get_users(db_session):
         i += 1
     output += str(i)
     return output
+
 
 # start serving
 if __name__ == '__main__':

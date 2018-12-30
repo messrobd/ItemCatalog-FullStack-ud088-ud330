@@ -11,64 +11,68 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+
 # Classes
 class User(Base):
     __tablename__ = 'user'
     id = Column(
         Integer,
-        primary_key = True
+        primary_key=True
     )
     email = Column(
         String,
-        nullable = False
+        nullable=False
     )
+
 
 class Type(Base):
     __tablename__ = 'type'
     id = Column(
         Integer,
-        primary_key = True
+        primary_key=True
     )
     name = Column(
         String,
-        nullable = False
+        nullable=False
     )
     description = Column(String)
     user_id = Column(
         Integer,
         ForeignKey('user.id'),
-        nullable = False
+        nullable=False
     )
 
     user = relationship(User)
+
 
 class Milk(Base):
     __tablename__ = 'milk'
     id = Column(
         Integer,
-        primary_key = True
+        primary_key=True
     )
     name = Column(
         String,
-        nullable = False
+        nullable=False
     )
     user_id = Column(
         Integer,
         ForeignKey('user.id'),
-        nullable = False
+        nullable=False
     )
 
     user = relationship(User)
+
 
 class Cheese(Base):
     __tablename__ = 'cheese'
     id = Column(
         Integer,
-        primary_key = True
+        primary_key=True
     )
     name = Column(
         String,
-        nullable = False
+        nullable=False
     )
     description = Column(String)
     place = Column(String)
@@ -76,17 +80,17 @@ class Cheese(Base):
     type_id = Column(
         Integer,
         ForeignKey('type.id'),
-        nullable = False
+        nullable=False
     )
     milk_id = Column(
         Integer,
         ForeignKey('milk.id'),
-        nullable = False
+        nullable=False
     )
     user_id = Column(
         Integer,
         ForeignKey('user.id'),
-        nullable = False
+        nullable=False
     )
 
     type = relationship(Type)
@@ -103,6 +107,7 @@ class Cheese(Base):
             'place': self.place,
             'image': self.image
         }
+
     @serialize.setter
     def deserialize(self, properties):
         self.name = properties['name']
@@ -111,6 +116,7 @@ class Cheese(Base):
         self.type_id = properties['type_id']
         self.milk_id = properties['milk_id']
         self.image = properties['image']
+
 
 # initialisation
 engine = create_engine('sqlite:///cheese.db')
