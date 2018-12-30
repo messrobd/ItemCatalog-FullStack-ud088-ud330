@@ -33,9 +33,8 @@ CLIENT_ID = json.loads(
 
 
 # db operations
-# cheese
-#   1. session wrapper: scope each server request to a db session
 def db_operation(operation):
+    '''Wrapper to scope requests to a session'''
     @wraps(operation)
     def session_wrapper(*args, **kwargs):
         session = DBSession()
@@ -45,7 +44,7 @@ def db_operation(operation):
     return session_wrapper
 
 
-#   2. CRUD functions
+#   cheese CRUD functions
 def get_items(session, kind):
     return session.query(kind).all()
 
