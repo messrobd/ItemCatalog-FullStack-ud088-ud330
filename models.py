@@ -94,21 +94,23 @@ class Cheese(Base):
     user = relationship(User)
 
     @property
-    def object(self):
+    def serialize(self):
         return {
             'name': self.name,
             'description': self.description,
             'type': self.type_id,
             'milk': self.milk_id,
-            'place': self.place
+            'place': self.place,
+            'image': self.image
         }
-    @object.setter
-    def update(self, object):
-        self.name = object['name']
-        self.description = object['description']
-        self.place = object['place']
-        self.type_id = object['type_id']
-        self.milk_id = object['milk_id']
+    @serialize.setter
+    def deserialize(self, properties):
+        self.name = properties['name']
+        self.description = properties['description']
+        self.place = properties['place']
+        self.type_id = properties['type_id']
+        self.milk_id = properties['milk_id']
+        self.image = properties['image']
 
 # initialisation
 engine = create_engine('sqlite:///cheese.db')

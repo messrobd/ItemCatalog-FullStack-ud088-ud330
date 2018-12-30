@@ -8,6 +8,10 @@ label {
 input[type="button"] {
   font: inherit;
 }
+textarea {
+  display: block;
+  -webkit-appearance: textfield;
+}
 .signin-status {
   display: flex;
   flex-direction: row-reverse;

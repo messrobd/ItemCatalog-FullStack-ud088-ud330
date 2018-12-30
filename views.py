@@ -64,7 +64,7 @@ def add_item(session, kind, **properties):
 @db_operation
 def edit_item(session, kind, id, **properties):
     item = get_item(kind, id=id)
-    item.object(properties)
+    item.deserialize = {**properties}
     session.add(item)
     session.commit()
 
@@ -142,12 +142,13 @@ def new_cheese():
             preset_type=preset_type,
             milks=milks)
     elif request.method == 'POST':
-        add_item(Cheese, \
-            name=request.form['name'], \
-            type_id=int(request.form['type']), \
-            description=request.form['description'], \
-            milk_id=int(request.form['milk']), \
-            place=request.form['place'], \
+        add_item(Cheese,
+            name=request.form['name'],
+            type_id=int(request.form['type']),
+            description=request.form['description'],
+            milk_id=int(request.form['milk']),
+            place=request.form['place'],
+            image=request.form['image'],
             user_id=login_session['user_id'])
         return redirect(url_for('get_index'))
 
@@ -161,17 +162,18 @@ def edit_cheese(cheese_id):
     if request.method == 'GET':
         types = get_items(Type)
         milks = get_items(Milk)
-        return render_template('edit_cheese.html', \
-            cheese=cheese, \
-            types=types, \
+        return render_template('edit_cheese.html',
+            cheese=cheese,
+            types=types,
             milks=milks)
     elif request.method == 'POST':
-        edit_item(Cheese, cheese_id, \
-            name=request.form['name'], \
-            type_id=int(request.form['type']), \
-            description=request.form['description'], \
-            milk_id=int(request.form['milk']), \
-            place=request.form['place'])
+        edit_item(Cheese, cheese_id,
+            name=request.form['name'],
+            type_id=int(request.form['type']),
+            description=request.form['description'],
+            milk_id=int(request.form['milk']),
+            place=request.form['place'],
+            image=request.form['image'])
         return redirect(url_for('get_cheese', cheese_id=cheese_id))
 
 @app.route('/catalog/cheese/<int:cheese_id>/delete', methods=['GET', 'POST'])
@@ -197,7 +199,7 @@ def login():
 # json endpoints
 @app.route('/api/v1/cheeses')
 def get_cheeses_json():
-    return jsonify(cheeses=[c.object for c in get_items(Cheese)])
+    return jsonify(cheeses=[c.serialize for c in get_items(Cheese)])
 
 @app.route('/api/v1/cheese/<int:cheese_id>')
 def get_cheese_json(cheese_id):

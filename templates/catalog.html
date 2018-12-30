@@ -20,7 +20,7 @@
         <li>{{ t['name'] }}</li>
         <ul>
           {% for c in t['cheeses'] %}
-            <li>{{ c.name }}</li>
+            <li><a href="{{ url_for('get_cheese', cheese_id=c.id) }}">{{ c.name }}</a></li>
           {% endfor %}
         </ul>
       {% endfor %}

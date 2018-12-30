@@ -23,7 +23,7 @@
         </select>
       </label>
       <label>Description:
-          <input name="description" value="{{ cheese.description }}">
+        <textarea name="description" rows="5" cols="50">{{ cheese.description }}</textarea>
       </label>
       <label>Milk:
         <select name="milk">
@@ -38,6 +38,9 @@
       </label>
       <label>Place of origin:
           <input name="place" value="{{ cheese.place }}">
+      </label>
+      <label>Image url:
+          <input name="image" value="{{ cheese.image }}">
       </label>
       <input type="submit" value="Update cheese">
       <input type="button" name="cancel" onclick="history.back()" value="Cancel">
