@@ -14,6 +14,7 @@ textarea {
 }
 .signin-status {
   display: flex;
+  display: -webkit-flex;
   flex-direction: row-reverse;
   align-items: baseline;
   height: 24px;
@@ -21,6 +22,7 @@ textarea {
 }
 .heading {
   display: flex;
+  display: -webkit-flex;
   align-items: baseline;
   justify-content: space-between;
 }
@@ -34,4 +36,23 @@ textarea {
 #result {
   font-size: 13px;
   padding-top: 13px;
+}
+img.cheese-image {
+  max-width: 300px;
+}
+.cheese-data {
+  display: flex;
+  display: -webkit-flex;
+}
+.cheese-details {
+  margin: 0 15px;
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: column;
+}
+.cheese-description {
+  flex: 1 0 auto;
+}
+.cheese-place {
+  flex: 0 0 auto;
 }

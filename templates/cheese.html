@@ -8,16 +8,23 @@
   <body>
     {% include 'partials/signin_status.html' %}
     <div class="cheese">
-      <div class="cheese-heading">
+      <div class="heading">
         <h1>{{ cheese.name }}</h1>
-        <p>{{ cheese.description }}</p>
-        <p>{{ cheese.place }}</p>
         {% if can_edit %}
           <form class="cheese-actions">
             <input type="button" name="edit" onclick="location.href='{{ url_for('edit_cheese', cheese_id=cheese.id) }}'" value="Edit">
             <input type="button" name="delete" onclick="location.href='{{ url_for('delete_cheese', cheese_id=cheese.id) }}'" value="Delete">
           </form>
         {% endif %}
+      </div>
+      <div class="cheese-data">
+        <div>
+          <img class="cheese-image" src="{{ cheese.image }}" alt="{{ cheese.name }}">
+        </div>
+        <div class="cheese-details">
+          <div class="cheese-description">{{ cheese.description }}</div>
+          <div class="cheese-place">Place of origin: {{ cheese.place }}</div>
+        </div>
       </div>
     </div>
 
