@@ -64,7 +64,7 @@ def add_item(session, kind, **properties):
     new_item = kind(**properties)
     session.add(new_item)
     session.commit()
-    return item
+    return new_item
 
 
 def edit_item(session, kind, id, **properties):

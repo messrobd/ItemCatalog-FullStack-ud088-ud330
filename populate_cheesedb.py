@@ -12,7 +12,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 session = DBSession()
-
+'''
 users = [
     User(email='messrobd@gmail.com'),
     User(email='robmessenger@yahoo.com')
@@ -36,6 +36,18 @@ for u, t, m, c in zip(users, types, milks, cheeses):
     session.add(m)
     session.add(c)
     session.commit()
+'''
+types2 = [
+    Type(name='Hard cheese', description='Yellow and gnarly', user_id=1),
+    Type(name='Washed-rind cheese', description='White and runny', user_id=1),
+]
+
+for t in types2:
+    session.add(t)
+    session.commit()
+
+session.add(Milk(name='ewe', user_id=1))
+session.commit()
 
 print(len(session.query(User).all()))
 print(len(session.query(Type).all()))

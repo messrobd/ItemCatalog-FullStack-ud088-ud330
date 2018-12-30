@@ -63,6 +63,7 @@ img.cheese-image {
 .cheese-type-preview {
   display: flex;
   display: -webkit-flex;
+  flex-wrap: wrap;
 }
 img.cheese-thumbnail {
   max-width: 150px;
