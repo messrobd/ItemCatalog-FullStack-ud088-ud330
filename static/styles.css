@@ -53,7 +53,7 @@ img.cheese-image {
 .cheese-description {
   flex: 1 0 auto;
 }
-.cheese-place {
+.cheese-attr {
   flex: 0 0 auto;
 }
 .breadcrumb {

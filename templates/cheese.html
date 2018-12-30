@@ -8,7 +8,7 @@
   <body>
     {% include 'partials/signin_status.html' %}
     <div class="breadcrumb">
-      <p><a href="{{ url_for('get_index') }}">Home</a> >> <a href="{{ url_for('get_cheeses', type_id=cheese.type_id) }}">Cheeses</a> >> {{ cheese.name }}</p>
+      <p><a href="{{ url_for('get_index') }}">Home</a> >> <a href="{{ url_for('get_cheeses', type_id=type.id) }}">{{ type.name }}</a> >> {{ cheese.name }}</p>
     </div>
     <div class="cheese">
       <div class="heading">
@@ -30,7 +30,9 @@
         </div>
         <div class="cheese-details">
           <div class="cheese-description">{{ cheese.description }}</div>
-          <div class="cheese-place">Place of origin: {{ cheese.place }}</div>
+          <div class="cheese-attr">Type: {{ type.name }}</div>
+          <div class="cheese-attr">Milk: {{ milk.name }}</div>
+          <div class="cheese-attr">Place of origin: {{ cheese.place }}</div>
         </div>
       </div>
     </div>

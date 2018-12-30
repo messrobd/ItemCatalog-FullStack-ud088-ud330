@@ -17,6 +17,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import \
     sessionmaker, \
     exc
+from functools import wraps
 from google.oauth2 import id_token
 from google.auth.transport import requests as auth_requests
 import requests
@@ -32,58 +33,47 @@ CLIENT_ID = json.loads(
 
 # db operations
 # cheese
+#   1. session wrapper: scope each server request to a db session
 def db_operation(operation):
-    def decorator(*args, **kwargs):
+    @wraps(operation)
+    def session_wrapper(*args, **kwargs):
         session = DBSession()
         output = operation(session, *args, **kwargs)
         session.close()
         return output
-    return decorator
+    return session_wrapper
 
-@db_operation
+#   2. CRUD functions
 def get_items(session, kind):
     return session.query(kind).all()
 
-@db_operation
 def get_filtered_items(session, kind, **filter_args):
     return session.query(kind).filter_by(**filter_args).all()
 
-@db_operation
 def get_item(session, kind, **filter_args):
     try:
         return session.query(kind).filter_by(**filter_args).one()
     except exc.NoResultFound:
         return None
 
-@db_operation
 def add_item(session, kind, **properties):
     new_item = kind(**properties)
     session.add(new_item)
     session.commit()
+    return item
 
-@db_operation
 def edit_item(session, kind, id, **properties):
-    item = get_item(kind, id=id)
+    item = get_item(session, kind, id=id)
     item.deserialize = {**properties}
     session.add(item)
     session.commit()
 
-@db_operation
 def delete_item(session, kind, id):
-    item = get_item(kind, id=id)
+    item = get_item(session, kind, id=id)
     session.delete(item)
     session.commit()
 
 # users
-@db_operation
-def create_user(session, email):
-    new_user = User(email=email)
-    session.add(new_user)
-    session.commit()
-    user = session.query(User).filter_by(email=email).one()
-    return user.id
-
-@db_operation
 def get_user_id(session, email):
     try:
         user = session.query(User).filter_by(email=email).one()
@@ -95,12 +85,13 @@ def get_user_id(session, email):
 # page views
 @app.route('/')
 @app.route('/catalog')
-def get_index():
+@db_operation
+def get_index(db_session):
     user_name = login_session.get('user_name')
-    types = get_items(Type)
+    types = get_items(db_session, Type)
     types_catalog = [{
             'name': t.name,
-            'cheeses': get_filtered_items(Cheese, type_id=t.id)
+            'cheeses': get_filtered_items(db_session, Cheese, type_id=t.id)
         } for t in types]
     return render_template('catalog.html',
         client_id=CLIENT_ID,
@@ -108,41 +99,47 @@ def get_index():
         types=types_catalog)
 
 @app.route('/catalog/type/<int:type_id>')
-def get_cheeses(type_id):
+@db_operation
+def get_cheeses(db_session, type_id):
     user_name = login_session.get('user_name')
-    type = get_item(Type, id=type_id)
-    cheeses_of_type = get_filtered_items(Cheese, type_id=type_id)
-    return render_template('cheeses.html', \
+    type = get_item(db_session, Type, id=type_id)
+    cheeses_of_type = get_filtered_items(db_session, Cheese, type_id=type_id)
+    return render_template('cheeses.html',
         user_name=user_name,
-        type=type, \
+        type=type,
         cheeses=cheeses_of_type)
 
 @app.route('/catalog/cheese/<int:cheese_id>')
-def get_cheese(cheese_id):
+@db_operation
+def get_cheese(db_session, cheese_id):
     loggedin_user = login_session.get('user_id')
     user_name = login_session.get('user_name')
-    cheese = get_item(Cheese, id=cheese_id)
+    cheese = get_item(db_session, Cheese, id=cheese_id)
+    type = get_item(db_session, Type, id=cheese.type_id)
+    milk = get_item(db_session, Milk, id=cheese.milk_id)
     cheese_creator = cheese.user_id
     can_edit = cheese_creator == loggedin_user
     return render_template('cheese.html',
-        user_name=user_name,
         can_edit=can_edit,
-        cheese=cheese)
+        cheese=cheese,
+        type=type,
+        milk=milk)
 
 @app.route('/catalog/cheese/new', methods=['GET', 'POST'])
-def new_cheese():
+@db_operation
+def new_cheese(db_session):
     if not login_session.get('user_id'):
         return redirect(url_for('login'))
     if request.method == 'GET':
-        types = get_items(Type)
-        milks = get_items(Milk)
+        types = get_items(db_session, Type)
+        milks = get_items(db_session, Milk)
         preset_type = int(request.args.get('type')) if request.args else None
         return render_template('new_cheese.html',
             types=types,
             preset_type=preset_type,
             milks=milks)
     elif request.method == 'POST':
-        add_item(Cheese,
+        add_item(db_session, Cheese,
             name=request.form['name'],
             type_id=int(request.form['type']),
             description=request.form['description'],
@@ -153,21 +150,22 @@ def new_cheese():
         return redirect(url_for('get_index'))
 
 @app.route('/catalog/cheese/<int:cheese_id>/edit', methods=['GET', 'POST'])
-def edit_cheese(cheese_id):
-    cheese = get_item(Cheese, id=cheese_id)
+@db_operation
+def edit_cheese(db_session, cheese_id):
+    cheese = get_item(db_session, Cheese, id=cheese_id)
     cheese_creator = cheese.user_id
     loggedin_user = login_session.get('user_id')
     if cheese_creator != loggedin_user:
         return redirect(url_for('login'))
     if request.method == 'GET':
-        types = get_items(Type)
-        milks = get_items(Milk)
+        types = get_items(db_session, Type)
+        milks = get_items(db_session, Milk)
         return render_template('edit_cheese.html',
             cheese=cheese,
             types=types,
             milks=milks)
     elif request.method == 'POST':
-        edit_item(Cheese, cheese_id,
+        edit_item(db_session, Cheese, cheese_id,
             name=request.form['name'],
             type_id=int(request.form['type']),
             description=request.form['description'],
@@ -177,8 +175,9 @@ def edit_cheese(cheese_id):
         return redirect(url_for('get_cheese', cheese_id=cheese_id))
 
 @app.route('/catalog/cheese/<int:cheese_id>/delete', methods=['GET', 'POST'])
-def delete_cheese(cheese_id):
-    cheese = get_item(Cheese, id=cheese_id)
+@db_operation
+def delete_cheese(db_session, cheese_id):
+    cheese = get_item(db_session, Cheese, id=cheese_id)
     cheese_creator = cheese.user_id
     loggedin_user = login_session.get('user_id')
     if cheese_creator != loggedin_user:
@@ -186,8 +185,9 @@ def delete_cheese(cheese_id):
     if request.method == 'GET':
         return render_template('delete_cheese.html', cheese=cheese)
     elif request.method == 'POST':
-        delete_item(Cheese, id=cheese_id)
-        return redirect(url_for('get_index'))
+        referer = request.headers['Referer']
+        delete_item(db_session, Cheese, id=cheese_id)
+        return redirect(referer)
 
 @app.route('/login')
 def login():
@@ -198,16 +198,20 @@ def login():
 
 # json endpoints
 @app.route('/api/v1/cheeses')
-def get_cheeses_json():
-    return jsonify(cheeses=[c.serialize for c in get_items(Cheese)])
+@db_operation
+def get_cheeses_json(db_session):
+    return jsonify(cheeses=[c.serialize \
+        for c in get_items(db_session, Cheese)])
 
 @app.route('/api/v1/cheese/<int:cheese_id>')
-def get_cheese_json(cheese_id):
-    return jsonify(get_item(Cheese, id=cheese_id).object)
+@db_operation
+def get_cheese_json(db_session, cheese_id):
+    return jsonify(get_item(db_session, Cheese, id=cheese_id).object)
 
 # authorisation flow
 @app.route('/tokensignin', methods=['POST'])
-def tokensignin():
+@db_operation
+def tokensignin(db_session):
     token_in = request.data
     client_id = json.loads(
         open('static/client_secret.json', 'r').read())['web']['client_id']
@@ -216,13 +220,15 @@ def tokensignin():
             token_in,
             auth_requests.Request(),
             client_id)
-        if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+        if id_info['iss'] not in [\
+            'accounts.google.com',
+            'https://accounts.google.com']:
             raise ValueError('wrong issuer')
     except ValueError:
         pass
     else:
-        registered_user_id = get_user_id(id_info['email']) \
-            or create_user(id_info['email'])
+        registered_user_id = get_user_id(db_session, id_info['email']) \
+            or add_item(db_session, User, email=id_info['email']).id
         login_session['user_id'] = registered_user_id
         login_session['user_name'] = id_info['name']
         return id_info['name']
@@ -237,7 +243,7 @@ def sign_out():
 # testing
 @app.route('/testdb')
 @db_operation
-def get_users(session):
+def get_users(db_session):
     output = ''
     i = 0
     for u in session.query(Cheese).all():
