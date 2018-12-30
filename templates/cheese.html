@@ -22,7 +22,11 @@
       </div>
       <div class="cheese-data">
         <div>
-          <img class="cheese-image" src="{{ cheese.image }}" alt="{{ cheese.name }}">
+          {% if cheese.image %}
+            <img class="cheese-image" src="{{ cheese.image }}" alt="img:{{ cheese.name }}">
+          {% else %}
+            <img class="cheese-image" src="/static/Cheese_pin.png" alt="img:{{ cheese.name }}">
+          {% endif %}
         </div>
         <div class="cheese-details">
           <div class="cheese-description">{{ cheese.description }}</div>

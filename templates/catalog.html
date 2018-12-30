@@ -26,7 +26,11 @@
             <div class="cheese-thumbnail">
               <a href="{{ url_for('get_cheese', cheese_id=c.id) }}">
                 <figure>
-                  <img class="cheese-thumbnail" src="{{ c.image }}" alt="{{ c.name }}">
+                  {% if c.image %}
+                    <img class="cheese-thumbnail" src="{{ c.image }}" alt="img:{{ c.name }}">
+                  {% else %}
+                    <img class="cheese-thumbnail" src="/static/Cheese_pin.png" alt="img:{{ c.name }}">
+                  {% endif %}
                   <figcaption>{{ c.name }}</figcaption>
                 </figure>
               </a>
