@@ -18,16 +18,23 @@
         </form>
       {% endif %}
     </div>
-    <ul class="types">
+    <div class="cheese-types">
       {% for t in types %}
-        <li>{{ t['name'] }}</li>
-        <ul>
+        <h2>{{ t['name'] }}</h2>
+        <div class="cheese-type-preview">
           {% for c in t['cheeses'] %}
-            <li><a href="{{ url_for('get_cheese', cheese_id=c.id) }}">{{ c.name }}</a></li>
+            <div class="cheese-thumbnail">
+              <a href="{{ url_for('get_cheese', cheese_id=c.id) }}">
+                <figure>
+                  <img class="cheese-thumbnail" src="{{ c.image }}" alt="{{ c.name }}">
+                  <figcaption>{{ c.name }}</figcaption>
+                </figure>
+              </a>
+            </div>
           {% endfor %}
-        </ul>
+        </div>
       {% endfor %}
-    </ul>
+    </div>
 
   </body>
 </html>

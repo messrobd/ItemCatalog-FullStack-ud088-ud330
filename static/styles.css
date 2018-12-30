@@ -60,3 +60,10 @@ img.cheese-image {
   font-size: 11px;
   font-style: italic;
 }
+.cheese-type-preview {
+  display: flex;
+  display: -webkit-flex;
+}
+img.cheese-thumbnail {
+  max-width: 150px;
+}
