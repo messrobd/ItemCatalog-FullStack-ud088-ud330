@@ -7,6 +7,9 @@
   </head>
   <body>
     {% include 'partials/signin_status.html' %}
+    <div class="breadcrumb">
+      <p><a href="{{ url_for('get_index') }}">Home</a> >> <a href="{{ url_for('get_cheeses', type_id=cheese.type_id) }}">Cheeses</a> >> {{ cheese.name }}</p>
+    </div>
     <div class="cheese">
       <div class="heading">
         <h1>{{ cheese.name }}</h1>

@@ -56,3 +56,7 @@ img.cheese-image {
 .cheese-place {
   flex: 0 0 auto;
 }
+.breadcrumb {
+  font-size: 11px;
+  font-style: italic;
+}

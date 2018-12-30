@@ -7,6 +7,9 @@
   </head>
   <body>
     {% include 'partials/signin_status.html' %}
+    <div class="breadcrumb">
+      <p><a href="{{ url_for('get_index') }}">Home</a> >> {{ type.name }}</p>
+    </div>
     <div class="heading">
       <h1>{{ type.name }}</h1>
       {% if user_name %}
