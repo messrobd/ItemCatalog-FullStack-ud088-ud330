@@ -16,7 +16,7 @@ How to run the application
 1. Fork the repo
 2. CD into the repo and run 'vagrant up' to bring up the vm
 3. 'vagrant ssh' into the vm and cd to /vagrant to access the shared folder
-4. run 'python views.py' to start serving
+4. run 'python views.py' to start serving (or python3, depending on your environment)
 5. browse to localhost:5000 to access the front page
 
 
