@@ -13,7 +13,7 @@
   <body>
     <div id="signin-dialog">
       <!-- Google signin component -->
-      <div class="g-signin2" data-onsuccess="onSuccess">
+      <div class="g-signin2" data-onsuccess="onSuccess" data-onfailure="onFailure">
 
       </div>
       <div id="result">
@@ -37,6 +37,10 @@
               }, 3000);
             }
           });
+      }
+
+      function onFailure(error) {
+        console.log(error);
       }
 
     </script>
