@@ -222,7 +222,7 @@ def get_cheeses_json(db_session):
 @app.route('/api/v1/cheese/<int:cheese_id>')
 @db_operation
 def get_cheese_json(db_session, cheese_id):
-    return jsonify(get_item(db_session, Cheese, id=cheese_id).object)
+    return jsonify(get_item(db_session, Cheese, id=cheese_id).serialize)
 
 
 # authorisation flow
