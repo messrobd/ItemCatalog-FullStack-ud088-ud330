@@ -58,7 +58,7 @@ def get_item(session, kind, **filter_args):
     try:
         return session.query(kind).filter_by(**filter_args).one()
     except exc.NoResultFound:
-        return None
+        raise KeyError
 
 
 def add_item(session, kind, **properties):
@@ -125,16 +125,20 @@ def get_cheeses(db_session, type_id):
 def get_cheese(db_session, cheese_id):
     loggedin_user = login_session.get('user_id')
     user_name = login_session.get('user_name')
-    cheese = get_item(db_session, Cheese, id=cheese_id)
-    type = get_item(db_session, Type, id=cheese.type_id)
-    milk = get_item(db_session, Milk, id=cheese.milk_id)
-    cheese_creator = cheese.user_id
-    can_edit = cheese_creator == loggedin_user
-    return render_template('cheese.html',
-                           can_edit=can_edit,
-                           cheese=cheese,
-                           type=type,
-                           milk=milk)
+    try:
+        cheese = get_item(db_session, Cheese, id=cheese_id)
+    except KeyError:
+        abort(404, description={'cheese_id': cheese_id})
+    else:
+        type = get_item(db_session, Type, id=cheese.type_id)
+        milk = get_item(db_session, Milk, id=cheese.milk_id)
+        cheese_creator = cheese.user_id
+        can_edit = cheese_creator == loggedin_user
+        return render_template('cheese.html',
+                               can_edit=can_edit,
+                               cheese=cheese,
+                               type=type,
+                               milk=milk)
 
 
 @app.route('/catalog/cheese/new', methods=['GET', 'POST'])
@@ -168,29 +172,33 @@ def edit_cheese(db_session, cheese_id):
     loggedin_user = login_session.get('user_id')
     if not loggedin_user:
         return redirect(url_for('login'))
-    cheese = get_item(db_session, Cheese, id=cheese_id)
-    cheese_creator = cheese.user_id
-    if cheese_creator != loggedin_user:
-        type = get_item(db_session, Type, id=cheese.type_id)
-        abort(403, description={'operation': 'edit',
-                                'cheese': cheese,
-                                'type': type})
-    if request.method == 'GET':
-        types = get_items(db_session, Type)
-        milks = get_items(db_session, Milk)
-        return render_template('edit_cheese.html',
-                               cheese=cheese,
-                               types=types,
-                               milks=milks)
-    elif request.method == 'POST':
-        edit_item(db_session, Cheese, cheese_id,
-                  name=request.form['name'],
-                  type_id=int(request.form['type']),
-                  description=request.form['description'],
-                  milk_id=int(request.form['milk']),
-                  place=request.form['place'],
-                  image=request.form['image'])
-        return redirect(url_for('get_cheese', cheese_id=cheese_id))
+    try:
+        cheese = get_item(db_session, Cheese, id=cheese_id)
+    except KeyError:
+        abort(404, description={'cheese_id': cheese_id})
+    else:
+        cheese_creator = cheese.user_id
+        if cheese_creator != loggedin_user:
+            type = get_item(db_session, Type, id=cheese.type_id)
+            abort(403, description={'operation': 'edit',
+                                    'cheese': cheese,
+                                    'type': type})
+        if request.method == 'GET':
+            types = get_items(db_session, Type)
+            milks = get_items(db_session, Milk)
+            return render_template('edit_cheese.html',
+                                   cheese=cheese,
+                                   types=types,
+                                   milks=milks)
+        elif request.method == 'POST':
+            edit_item(db_session, Cheese, cheese_id,
+                      name=request.form['name'],
+                      type_id=int(request.form['type']),
+                      description=request.form['description'],
+                      milk_id=int(request.form['milk']),
+                      place=request.form['place'],
+                      image=request.form['image'])
+            return redirect(url_for('get_cheese', cheese_id=cheese_id))
 
 
 @app.route('/catalog/cheese/<int:cheese_id>/delete', methods=['GET', 'POST'])
@@ -199,19 +207,23 @@ def delete_cheese(db_session, cheese_id):
     loggedin_user = login_session.get('user_id')
     if not loggedin_user:
         return redirect(url_for('login'))
-    cheese = get_item(db_session, Cheese, id=cheese_id)
-    cheese_creator = cheese.user_id
-    if cheese_creator != loggedin_user:
-        type = get_item(db_session, Type, id=cheese.type_id)
-        abort(403, description={'operation': 'delete',
-                                'cheese': cheese,
-                                'type': type})
-    if request.method == 'GET':
-        return render_template('delete_cheese.html', cheese=cheese)
-    elif request.method == 'POST':
-        referrer = request.headers.get('Referer') or '/'
-        delete_item(db_session, Cheese, id=cheese_id)
-        return redirect(referrer)
+    try:
+        cheese = get_item(db_session, Cheese, id=cheese_id)
+    except KeyError:
+        abort(404, description={'cheese_id': cheese_id})
+    else:
+        cheese_creator = cheese.user_id
+        if cheese_creator != loggedin_user:
+            type = get_item(db_session, Type, id=cheese.type_id)
+            abort(403, description={'operation': 'delete',
+                                    'cheese': cheese,
+                                    'type': type})
+        if request.method == 'GET':
+            return render_template('delete_cheese.html', cheese=cheese)
+        elif request.method == 'POST':
+            referrer = request.headers.get('Referer') or '/'
+            delete_item(db_session, Cheese, id=cheese_id)
+            return redirect(referrer)
 
 
 @app.route('/login')
@@ -278,6 +290,13 @@ def unauthorised(e):
                            operation=description['operation'],
                            cheese=description['cheese'],
                            type=description['type']), 403
+
+
+@app.errorhandler(404)
+def item_not_found(e):
+    description = e.description
+    return render_template('404.html',
+                           cheese_id=description['cheese_id']), 404
 
 
 # testing
