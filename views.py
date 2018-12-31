@@ -209,17 +209,17 @@ def delete_cheese(db_session, cheese_id):
     if request.method == 'GET':
         return render_template('delete_cheese.html', cheese=cheese)
     elif request.method == 'POST':
-        referer = request.headers['Referer']
+        referrer = request.headers.get('Referer') or '/'
         delete_item(db_session, Cheese, id=cheese_id)
-        return redirect(referer)
+        return redirect(referrer)
 
 
 @app.route('/login')
 def login():
-    referer = request.headers['Referer']
+    referrer = request.headers.get('Referer') or '/'
     return render_template('login.html',
                            client_id=CLIENT_ID,
-                           referer=referer)
+                           referrer=referrer)
 
 
 # json endpoints
@@ -264,10 +264,10 @@ def tokensignin(db_session):
 
 @app.route('/signout')
 def sign_out():
-    referer = request.headers['Referer']
+    referrer = request.headers.get('Referer') or '/'
     del login_session['user_id']
     del login_session['user_name']
-    return redirect(referer)
+    return redirect(referrer)
 
 
 # error handling

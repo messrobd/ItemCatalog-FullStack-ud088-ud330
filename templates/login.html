@@ -33,7 +33,7 @@
             success: function(result){
               $('#result').html('Welcome, ' + result);
               setTimeout(function() {
-                window.location.href = '{{ referer }}';
+                window.location.href = '{{ referrer }}';
               }, 3000);
             }
           });
