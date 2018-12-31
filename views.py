@@ -6,7 +6,8 @@ from flask import \
     request, \
     redirect, \
     session as login_session, \
-    jsonify
+    jsonify, \
+    abort
 from models import \
     Base, \
     User, \
@@ -164,11 +165,16 @@ def new_cheese(db_session):
 @app.route('/catalog/cheese/<int:cheese_id>/edit', methods=['GET', 'POST'])
 @db_operation
 def edit_cheese(db_session, cheese_id):
+    loggedin_user = login_session.get('user_id')
+    if not loggedin_user:
+        return redirect(url_for('login'))
     cheese = get_item(db_session, Cheese, id=cheese_id)
     cheese_creator = cheese.user_id
-    loggedin_user = login_session.get('user_id')
     if cheese_creator != loggedin_user:
-        return redirect(url_for('login'))
+        type = get_item(db_session, Type, id=cheese.type_id)
+        abort(403, description={'operation': 'edit',
+                                'cheese': cheese,
+                                'type': type})
     if request.method == 'GET':
         types = get_items(db_session, Type)
         milks = get_items(db_session, Milk)
@@ -190,11 +196,16 @@ def edit_cheese(db_session, cheese_id):
 @app.route('/catalog/cheese/<int:cheese_id>/delete', methods=['GET', 'POST'])
 @db_operation
 def delete_cheese(db_session, cheese_id):
+    loggedin_user = login_session.get('user_id')
+    if not loggedin_user:
+        return redirect(url_for('login'))
     cheese = get_item(db_session, Cheese, id=cheese_id)
     cheese_creator = cheese.user_id
-    loggedin_user = login_session.get('user_id')
     if cheese_creator != loggedin_user:
-        return redirect(url_for('login'))
+        type = get_item(db_session, Type, id=cheese.type_id)
+        abort(403, description={'operation': 'delete',
+                                'cheese': cheese,
+                                'type': type})
     if request.method == 'GET':
         return render_template('delete_cheese.html', cheese=cheese)
     elif request.method == 'POST':
@@ -257,6 +268,16 @@ def sign_out():
     del login_session['user_id']
     del login_session['user_name']
     return redirect(referer)
+
+
+# error handling
+@app.errorhandler(403)
+def unauthorised(e):
+    description = e.description
+    return render_template('403.html',
+                           operation=description['operation'],
+                           cheese=description['cheese'],
+                           type=description['type']), 403
 
 
 # testing
