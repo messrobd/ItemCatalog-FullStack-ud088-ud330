@@ -103,8 +103,8 @@ def get_index(db_session):
             'cheeses': get_filtered_items(db_session, Cheese, type_id=t.id)
         } for t in types]
     return render_template('catalog.html',
-                           client_id=CLIENT_ID,
                            user_name=user_name,
+                           client_id=CLIENT_ID,
                            types=types_catalog)
 
 
@@ -135,6 +135,7 @@ def get_cheese(db_session, cheese_id):
         cheese_creator = cheese.user_id
         can_edit = cheese_creator == loggedin_user
         return render_template('cheese.html',
+                               user_name=user_name,
                                can_edit=can_edit,
                                cheese=cheese,
                                type=type,
@@ -287,6 +288,7 @@ def sign_out():
 def unauthorised(e):
     description = e.description
     return render_template('403.html',
+                           user_name=user_name,
                            operation=description['operation'],
                            cheese=description['cheese'],
                            type=description['type']), 403
@@ -296,6 +298,7 @@ def unauthorised(e):
 def item_not_found(e):
     description = e.description
     return render_template('404.html',
+                           user_name=user_name,
                            cheese_id=description['cheese_id']), 404
 
 
