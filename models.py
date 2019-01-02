@@ -7,7 +7,9 @@ from sqlalchemy import \
     String, \
     create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import \
+    relationship, \
+    validates
 
 Base = declarative_base()
 
@@ -96,6 +98,20 @@ class Cheese(Base):
     type = relationship(Type)
     milk = relationship(Milk)
     user = relationship(User)
+
+    @validates('name', 'type_id', 'milk_id', 'user_id')
+    def typecheck_fields(self, key, field):
+        try:
+            if key == 'name':
+                assert type(field) == str and field is not '', \
+                    'Name must be a non-empty string'
+            else:
+                assert type(field) == int, \
+                    '{key} must be an integer'.format(key=key)
+        except AssertionError as a:
+            raise ValueError(a.args[0])
+        else:
+            return field
 
     @property
     def serialize(self):

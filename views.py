@@ -62,10 +62,19 @@ def get_item(session, kind, **filter_args):
 
 
 def add_item(session, kind, **properties):
-    new_item = kind(**properties)
-    session.add(new_item)
-    session.commit()
-    return new_item
+    try:
+        new_item = kind(**properties)
+    except ValueError:
+        raise
+    else:
+        session.add(new_item)
+    try:
+        session.commit()
+    except exc.IntegrityError as i:
+        session.rollback()
+        raise ValueError(i.args[0])
+    else:
+        return new_item
 
 
 def edit_item(session, kind, id, **properties):
@@ -156,34 +165,39 @@ def new_cheese(db_session):
                                preset_type=preset_type,
                                milks=milks)
     elif request.method == 'POST':
-        add_item(db_session, Cheese,
-                 name=request.form['name'],
-                 type_id=int(request.form['type']),
-                 description=request.form['description'],
-                 milk_id=int(request.form['milk']),
-                 place=request.form['place'],
-                 image=request.form['image'],
-                 user_id=login_session['user_id'])
-        return redirect(url_for('get_index'))
+        try:
+            add_item(db_session, Cheese,
+                     name=request.form['name'],
+                     type_id=int(request.form['type']),
+                     description=request.form['description'],
+                     milk_id=int(request.form['milk']),
+                     place=request.form['place'],
+                     image=request.form['image'],
+                     user_id=login_session['user_id'])
+        except ValueError as v:
+            user_name = login_session.get('user_name')
+            abort(400, description={'user_name': user_name,
+                                    'message': v.args[0]})
+        else:
+            return redirect(url_for('get_index'))
 
 
 @app.route('/catalog/cheese/<int:cheese_id>/edit', methods=['GET', 'POST'])
 @db_operation
 def edit_cheese(db_session, cheese_id):
     loggedin_user = login_session.get('user_id')
+    user_name = login_session.get('user_name')
     if not loggedin_user:
         return redirect(url_for('login'))
     try:
         cheese = get_item(db_session, Cheese, id=cheese_id)
     except KeyError:
-        user_name = login_session.get('user_name')
         abort(404, description={'user_name': user_name,
                                 'cheese_id': cheese_id})
     else:
         cheese_creator = cheese.user_id
         if cheese_creator != loggedin_user:
             type = get_item(db_session, Type, id=cheese.type_id)
-            user_name = login_session.get('user_name')
             abort(403, description={'user_name': user_name,
                                     'operation': 'edit',
                                     'cheese': cheese,
@@ -196,14 +210,19 @@ def edit_cheese(db_session, cheese_id):
                                    types=types,
                                    milks=milks)
         elif request.method == 'POST':
-            edit_item(db_session, Cheese, cheese_id,
-                      name=request.form['name'],
-                      type_id=int(request.form['type']),
-                      description=request.form['description'],
-                      milk_id=int(request.form['milk']),
-                      place=request.form['place'],
-                      image=request.form['image'])
-            return redirect(url_for('get_cheese', cheese_id=cheese_id))
+            try:
+                edit_item(db_session, Cheese, cheese_id,
+                          name=request.form['name'],
+                          type_id=int(request.form['type']),
+                          description=request.form['description'],
+                          milk_id=int(request.form['milk']),
+                          place=request.form['place'],
+                          image=request.form['image'])
+            except ValueError as v:
+                abort(400, description={'user_name': user_name,
+                                        'message': v.args[0]})
+            else:
+                return redirect(url_for('get_cheese', cheese_id=cheese_id))
 
 
 @app.route('/catalog/cheese/<int:cheese_id>/delete', methods=['GET', 'POST'])
@@ -292,6 +311,13 @@ def sign_out():
 
 
 # error handling
+@app.errorhandler(400)
+def bad_request(e):
+    description = e.description
+    return render_template('400.html',
+                           user_name=description['user_name'],
+                           message=description['message']), 400
+
 @app.errorhandler(403)
 def unauthorised(e):
     description = e.description
