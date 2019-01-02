@@ -8,6 +8,12 @@ label {
 input[type="button"], input[type="submit"] {
   font: inherit;
 }
+input:invalid {
+  -moz-box-shadow: none;
+}
+input:focus::placeholder {
+  color: transparent;
+}
 textarea {
   display: block;
   -webkit-appearance: textfield;

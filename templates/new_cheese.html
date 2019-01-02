@@ -7,17 +7,17 @@
   </head>
   <body>
     <h1>Create a new cheese</h1>
-    <form class="new-cheese" action="{{ url_for('new_cheese') }}" method="POST">
+    <form name="new-cheese" action="{{ url_for('new_cheese') }}" method="POST" onsubmit="return validateForm()">
       <label>Name:
-          <input name="name">
+          <input required type="text" name="name" placeholder="Name is required!">
       </label>
       <label>Type:
         <select name="type">
           {% for t in types %}
             {% if t.id == preset_type %}
-              <option value="{{ t.id  }}" selected>{{ t.name  }}</option>
+              <option type="number" value="{{ t.id  }}" selected>{{ t.name  }}</option>
             {% else %}
-              <option value="{{ t.id  }}">{{ t.name  }}</option>
+              <option type="number" value="{{ t.id  }}">{{ t.name  }}</option>
             {% endif %}
           {% endfor %}
         </select>
@@ -28,15 +28,15 @@
       <label>Milk:
         <select name="milk">
           {% for m in milks %}
-            <option value="{{ m.id  }}">{{ m.name  }}</option>
+            <option type="number" value="{{ m.id  }}">{{ m.name  }}</option>
           {% endfor %}
         </select>
       </label>
       <label>Place of origin:
-          <input name="place">
+          <input type="text" name="place">
       </label>
       <label>Image url:
-          <input name="image">
+          <input type="url" name="image" pattern="https?://.+">
       </label>
       <input type="submit" value="Create cheese">
       <input type="button" name="cancel" onclick="history.back()" value="Cancel">

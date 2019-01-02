@@ -318,6 +318,7 @@ def bad_request(e):
                            user_name=description['user_name'],
                            message=description['message']), 400
 
+
 @app.errorhandler(403)
 def unauthorised(e):
     description = e.description

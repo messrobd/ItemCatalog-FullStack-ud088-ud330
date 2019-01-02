@@ -9,7 +9,7 @@
     <h1>Edit a cheese</h1>
     <form class="update-cheese" action="{{ url_for('edit_cheese', cheese_id=cheese.id) }}" method="POST">
       <label>Name:
-          <input name="name" value="{{ cheese.name }}">
+          <input required type="text" name="name" placeholder="Name is required!" value="{{ cheese.name }}">
       </label>
       <label>Type:
         <select name="type">
@@ -37,10 +37,10 @@
         </select>
       </label>
       <label>Place of origin:
-          <input name="place" value="{{ cheese.place }}">
+          <input type="text" name="place" value="{{ cheese.place }}">
       </label>
       <label>Image url:
-          <input name="image" value="{{ cheese.image }}">
+          <input type="url" name="image" pattern="https?://.+" value="{{ cheese.image }}">
       </label>
       <input type="submit" value="Update cheese">
       <input type="button" name="cancel" onclick="history.back()" value="Cancel">
