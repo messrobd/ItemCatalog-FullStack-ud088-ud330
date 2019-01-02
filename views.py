@@ -176,12 +176,16 @@ def edit_cheese(db_session, cheese_id):
     try:
         cheese = get_item(db_session, Cheese, id=cheese_id)
     except KeyError:
-        abort(404, description={'cheese_id': cheese_id})
+        user_name = login_session.get('user_name')
+        abort(404, description={'user_name': user_name,
+                                'cheese_id': cheese_id})
     else:
         cheese_creator = cheese.user_id
         if cheese_creator != loggedin_user:
             type = get_item(db_session, Type, id=cheese.type_id)
-            abort(403, description={'operation': 'edit',
+            user_name = login_session.get('user_name')
+            abort(403, description={'user_name': user_name,
+                                    'operation': 'edit',
                                     'cheese': cheese,
                                     'type': type})
         if request.method == 'GET':
@@ -211,12 +215,16 @@ def delete_cheese(db_session, cheese_id):
     try:
         cheese = get_item(db_session, Cheese, id=cheese_id)
     except KeyError:
-        abort(404, description={'cheese_id': cheese_id})
+        user_name = login_session.get('user_name')
+        abort(404, description={'user_name': user_name,
+                                'cheese_id': cheese_id})
     else:
         cheese_creator = cheese.user_id
         if cheese_creator != loggedin_user:
             type = get_item(db_session, Type, id=cheese.type_id)
-            abort(403, description={'operation': 'delete',
+            user_name = login_session.get('user_name')
+            abort(403, description={'user_name': user_name,
+                                    'operation': 'delete',
                                     'cheese': cheese,
                                     'type': type})
         if request.method == 'GET':
@@ -288,7 +296,7 @@ def sign_out():
 def unauthorised(e):
     description = e.description
     return render_template('403.html',
-                           user_name=user_name,
+                           user_name=description['user_name'],
                            operation=description['operation'],
                            cheese=description['cheese'],
                            type=description['type']), 403
@@ -298,7 +306,7 @@ def unauthorised(e):
 def item_not_found(e):
     description = e.description
     return render_template('404.html',
-                           user_name=user_name,
+                           user_name=description['user_name'],
                            cheese_id=description['cheese_id']), 404
 
 
