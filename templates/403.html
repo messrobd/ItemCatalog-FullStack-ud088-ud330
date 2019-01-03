@@ -6,15 +6,12 @@
     <link rel="stylesheet" href="/static/styles.css">
   </head>
   <body>
-    {% include 'partials/signin_status.html' %}
     <div class="breadcrumb">
       <p><a href="{{ url_for('get_index') }}">Home</a> >>
-        <a href="{{ url_for('get_cheeses', type_id=type.id) }}">{{ type.name }}</a> >>
-        <a href="{{ url_for('get_cheese', cheese_id=cheese.id) }}">{{ cheese.name }}</a> >>
         Unauthorised
       </p>
     </div>
     <h1>Unauthorised</h1>
-    <p>You are not authorised to {{ operation }} {{ cheese.name }}.</p>
+    <p>{{ error }}</p>
   </body>
 </html>

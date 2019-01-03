@@ -6,13 +6,12 @@
     <link rel="stylesheet" href="/static/styles.css">
   </head>
   <body>
-    {% include 'partials/signin_status.html' %}
     <div class="breadcrumb">
       <p><a href="{{ url_for('get_index') }}">Home</a> >>
         Invalid
       </p>
     </div>
     <h1>Invalid cheese</h1>
-    <p>{{ message }}</p>
+    <p>{{ error }}</p>
   </body>
 </html>

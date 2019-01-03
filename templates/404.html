@@ -6,13 +6,12 @@
     <link rel="stylesheet" href="/static/styles.css">
   </head>
   <body>
-    {% include 'partials/signin_status.html' %}
     <div class="breadcrumb">
       <p><a href="{{ url_for('get_index') }}">Home</a> >>
         Not found
       </p>
     </div>
     <h1>Item not found</h1>
-    <p>No cheese with id {{ cheese_id }} could be found.</p>
+    <p>{{ error }}</p>
   </body>
 </html>

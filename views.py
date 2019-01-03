@@ -1,28 +1,31 @@
 #!/usr/bin/env python3
-from flask import \
-    Flask, \
-    render_template, \
-    url_for, \
-    request, \
-    redirect, \
-    session as login_session, \
-    jsonify, \
-    abort
-from models import \
-    Base, \
-    User, \
-    Type, \
-    Milk, \
-    Cheese
+from flask import (
+    Flask,
+    render_template,
+    url_for,
+    request,
+    redirect,
+    session as login_session,
+    jsonify)
+from models import (
+    Base,
+    User,
+    Type,
+    Milk,
+    Cheese)
 from sqlalchemy import create_engine
-from sqlalchemy.orm import \
-    sessionmaker, \
-    exc
+from sqlalchemy.orm import (
+    sessionmaker,
+    exc)
 from functools import wraps
 from google.oauth2 import id_token
 from google.auth.transport import requests as auth_requests
 import requests
 import json
+from werkzeug.exceptions import (
+    NotFound,
+    Forbidden,
+    BadRequest)
 
 app = Flask(__name__)
 engine = create_engine('sqlite:///cheese.db')
@@ -39,13 +42,18 @@ def db_operation(operation):
     @wraps(operation)
     def session_wrapper(*args, **kwargs):
         session = DBSession()
-        output = operation(session, *args, **kwargs)
-        session.close()
-        return output
+        try:
+            output = operation(session, *args, **kwargs)
+        except:
+            raise
+        else:
+            return output
+        finally:
+            session.close()
     return session_wrapper
 
 
-#   cheese CRUD functions
+# cheese CRUD functions
 def get_items(session, kind):
     return session.query(kind).all()
 
@@ -78,10 +86,23 @@ def add_item(session, kind, **properties):
 
 
 def edit_item(session, kind, id, **properties):
-    item = get_item(session, kind, id=id)
-    item.deserialize = {**properties}
-    session.add(item)
-    session.commit()
+    try:
+        item = get_item(session, kind, id=id)
+    except KeyError:
+        raise
+    try:
+        item.deserialize = properties
+    except ValueError:
+        raise
+    else:
+        session.add(item)
+    try:
+        session.commit()
+    except exc.IntegrityError as i:
+        session.rollback()
+        raise ValueError(i.args[0])
+    else:
+        return item
 
 
 def delete_item(session, kind, id):
@@ -133,16 +154,17 @@ def get_cheeses(db_session, type_id):
 @db_operation
 def get_cheese(db_session, cheese_id):
     loggedin_user = login_session.get('user_id')
-    user_name = login_session.get('user_name')
     try:
         cheese = get_item(db_session, Cheese, id=cheese_id)
     except KeyError:
-        abort(404, description={'cheese_id': cheese_id})
+        raise NotFound(
+              'No cheese with id {} could be found.'.format(cheese_id))
     else:
         type = get_item(db_session, Type, id=cheese.type_id)
         milk = get_item(db_session, Milk, id=cheese.milk_id)
         cheese_creator = cheese.user_id
         can_edit = cheese_creator == loggedin_user
+        user_name = login_session.get('user_name')
         return render_template('cheese.html',
                                user_name=user_name,
                                can_edit=can_edit,
@@ -175,9 +197,7 @@ def new_cheese(db_session):
                      image=request.form['image'],
                      user_id=login_session['user_id'])
         except ValueError as v:
-            user_name = login_session.get('user_name')
-            abort(400, description={'user_name': user_name,
-                                    'message': v.args[0]})
+            raise BadRequestr(v.args[0])
         else:
             return redirect(url_for('get_index'))
 
@@ -192,16 +212,13 @@ def edit_cheese(db_session, cheese_id):
     try:
         cheese = get_item(db_session, Cheese, id=cheese_id)
     except KeyError:
-        abort(404, description={'user_name': user_name,
-                                'cheese_id': cheese_id})
+        raise NotFound(
+              'No cheese with id {} could be found.'.format(cheese_id))
     else:
         cheese_creator = cheese.user_id
         if cheese_creator != loggedin_user:
-            type = get_item(db_session, Type, id=cheese.type_id)
-            abort(403, description={'user_name': user_name,
-                                    'operation': 'edit',
-                                    'cheese': cheese,
-                                    'type': type})
+            raise Forbidden(
+                  'You are not authorised to edit {}.'.format(cheese.name))
         if request.method == 'GET':
             types = get_items(db_session, Type)
             milks = get_items(db_session, Milk)
@@ -219,8 +236,7 @@ def edit_cheese(db_session, cheese_id):
                           place=request.form['place'],
                           image=request.form['image'])
             except ValueError as v:
-                abort(400, description={'user_name': user_name,
-                                        'message': v.args[0]})
+                raise BadRequest(v.args[0])
             else:
                 return redirect(url_for('get_cheese', cheese_id=cheese_id))
 
@@ -234,18 +250,13 @@ def delete_cheese(db_session, cheese_id):
     try:
         cheese = get_item(db_session, Cheese, id=cheese_id)
     except KeyError:
-        user_name = login_session.get('user_name')
-        abort(404, description={'user_name': user_name,
-                                'cheese_id': cheese_id})
+        raise NotFound(
+              'No cheese with id {} could be found.'.format(cheese_id))
     else:
         cheese_creator = cheese.user_id
         if cheese_creator != loggedin_user:
-            type = get_item(db_session, Type, id=cheese.type_id)
-            user_name = login_session.get('user_name')
-            abort(403, description={'user_name': user_name,
-                                    'operation': 'delete',
-                                    'cheese': cheese,
-                                    'type': type})
+            raise Forbidden(
+                  'You are not authorised to delete {}.'.format(cheese.name))
         if request.method == 'GET':
             return render_template('delete_cheese.html', cheese=cheese)
         elif request.method == 'POST':
@@ -313,28 +324,17 @@ def sign_out():
 # error handling
 @app.errorhandler(400)
 def bad_request(e):
-    description = e.description
-    return render_template('400.html',
-                           user_name=description['user_name'],
-                           message=description['message']), 400
+    return render_template('400.html', error=e), 400
 
 
 @app.errorhandler(403)
 def unauthorised(e):
-    description = e.description
-    return render_template('403.html',
-                           user_name=description['user_name'],
-                           operation=description['operation'],
-                           cheese=description['cheese'],
-                           type=description['type']), 403
+    return render_template('403.html', error=e), 403
 
 
 @app.errorhandler(404)
 def item_not_found(e):
-    description = e.description
-    return render_template('404.html',
-                           user_name=description['user_name'],
-                           cheese_id=description['cheese_id']), 404
+    return render_template('404.html', error=e), 404
 
 
 # testing
