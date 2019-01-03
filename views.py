@@ -232,8 +232,7 @@ def new_cheese(db_session):
         except ValueError as v:
             raise BadRequestr(v.args[0])
         else:
-            #return redirect(url_for('get_cheese', cheese_id=new_cheese.id))
-            return redirect(url_for('get_index'))
+            return redirect(url_for('get_cheese', cheese_id=new_cheese.id))
 
 
 @app.route('/catalog/cheese/<int:cheese_id>/edit', methods=['GET', 'POST'])
