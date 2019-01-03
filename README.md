@@ -42,6 +42,10 @@ session entity (as login_session in my case).
 Pages are rendered using Flask templates, which can be found in the 'templates'
 sub-directory.
 
+Form validation is done on the client side using built-in hrml and css features
+[4, 5]. Additional validation is done server-side, resulting in 400 errors
+handled by Flask errorhandlers  
+
 Authn/Authz
 
 CRUD operations can only be performed by authorized users. Authentication is
@@ -68,7 +72,7 @@ API access does not require authorisation.
 Other files
 
 The repo contains certain other files which are not system components:
-* populate_cheesedb.py: a script for generating test data in the db
+* Vagrantfile: configuration for the Vagrant VM (provided by Udacity)
 * secret_key_generator.py: a script for generating the secret key used to sign
 the Flask login session
 
@@ -78,3 +82,5 @@ References:
   1. https://docs.sqlalchemy.org/en/rel_1_2/orm/session_basics.html#when-do-i-construct-a-session-when-do-i-commit-it-and-when-do-i-close-it
   2. https://developers.google.com/identity/sign-in/web/sign-in
   3. https://developers.google.com/identity/sign-in/web/backend-auth
+  4. https://www.the-art-of-web.com/html/html5-form-validation/
+  5. https://stackoverflow.com/questions/9707021/how-do-i-auto-hide-placeholder-text-upon-focus-using-css-or-jquery
