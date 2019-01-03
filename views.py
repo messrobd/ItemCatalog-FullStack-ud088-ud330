@@ -38,7 +38,8 @@ CLIENT_ID = json.loads(
 
 # db operations
 def db_operation(operation):
-    '''Wrapper to scope requests to a session'''
+    '''Wrapper to scope web server requests to a db session. Ensures the
+    session is closed in the event that a request throws an exception '''
     @wraps(operation)
     def session_wrapper(*args, **kwargs):
         session = DBSession()
@@ -55,14 +56,22 @@ def db_operation(operation):
 
 # cheese CRUD functions
 def get_items(session, kind):
+    '''Get all items of the given kind from the db. 'kind' must be a sqlalchemy
+    modelled object'''
     return session.query(kind).all()
 
 
 def get_filtered_items(session, kind, **filter_args):
+    '''Get all items of the given kind, filtered by the given args, from the
+    db. 'kind' must be a sqlalchemy modelled object, 'filter_args' are assumed
+    to be properties of the given kind '''
     return session.query(kind).filter_by(**filter_args).all()
 
 
 def get_item(session, kind, **filter_args):
+    '''Gets exactly one of the given kind, selected by the given args, from
+    the db, or raises an exception. 'kind' must be a sqlalchemy modelled
+    object '''
     try:
         return session.query(kind).filter_by(**filter_args).one()
     except exc.NoResultFound:
@@ -70,6 +79,9 @@ def get_item(session, kind, **filter_args):
 
 
 def add_item(session, kind, **properties):
+    '''Adds an object of the given kind, with the given properties, to the db.
+    Returns the new object, or raises an exception in the event that it fails
+    validation. 'kind' must be a sqlalchemy modelled object '''
     try:
         new_item = kind(**properties)
     except ValueError:
@@ -86,6 +98,9 @@ def add_item(session, kind, **properties):
 
 
 def edit_item(session, kind, id, **properties):
+    '''Edits an object of the given kind, overwriting its properties with those
+    provided. Returns the new object, or raises an exception in the event that
+    it fails validation. 'kind' must be a sqlalchemy modelled object '''
     try:
         item = get_item(session, kind, id=id)
     except KeyError:
@@ -106,13 +121,21 @@ def edit_item(session, kind, id, **properties):
 
 
 def delete_item(session, kind, id):
-    item = get_item(session, kind, id=id)
-    session.delete(item)
+    '''Deletes the given object from the db. 'kind' must be a sqlalchemy
+    modelled object '''
+    try:
+        item = get_item(session, kind, id=id)
+    except KeyError:
+        raise
+    else:
+        session.delete(item)
     session.commit()
 
 
 # users
 def get_user_id(session, email):
+    ''' Given an email, returns the ID of the corresponding user, or none if
+    the user is not registered '''
     try:
         user = session.query(User).filter_by(email=email).one()
         return user.id
@@ -126,6 +149,9 @@ def get_user_id(session, email):
 @app.route('/catalog')
 @db_operation
 def get_index(db_session):
+    '''Serves the view for the homepage. Gets all cheeses in the db, grouped
+    by type, and returns the 'catalog' template. If the user is logged in, the
+    option to create a cheese will be afforded '''
     user_name = login_session.get('user_name')
     types = get_items(db_session, Type)
     types_catalog = [{
@@ -141,6 +167,7 @@ def get_index(db_session):
 @app.route('/catalog/type/<int:type_id>')
 @db_operation
 def get_cheeses(db_session, type_id):
+    '''Serves the view for a type of cheese '''
     user_name = login_session.get('user_name')
     type = get_item(db_session, Type, id=type_id)
     cheeses_of_type = get_filtered_items(db_session, Cheese, type_id=type_id)
@@ -153,6 +180,9 @@ def get_cheeses(db_session, type_id):
 @app.route('/catalog/cheese/<int:cheese_id>')
 @db_operation
 def get_cheese(db_session, cheese_id):
+    '''Serves the view for a cheese. If the logged-user created the cheese, the
+    options to edit and delete it will be afforded. In the event that a
+    non-existant cheese is requested, a 404 error will be returned '''
     loggedin_user = login_session.get('user_id')
     try:
         cheese = get_item(db_session, Cheese, id=cheese_id)
@@ -176,6 +206,9 @@ def get_cheese(db_session, cheese_id):
 @app.route('/catalog/cheese/new', methods=['GET', 'POST'])
 @db_operation
 def new_cheese(db_session):
+    ''' Serves the form for creating a new cheese, and responds to the POST
+    request on form submission. Required fields are enforced by the client;
+    server validation is also performed on submission '''
     if not login_session.get('user_id'):
         return redirect(url_for('login'))
     if request.method == 'GET':
@@ -188,23 +221,29 @@ def new_cheese(db_session):
                                milks=milks)
     elif request.method == 'POST':
         try:
-            add_item(db_session, Cheese,
-                     name=request.form['name'],
-                     type_id=int(request.form['type']),
-                     description=request.form['description'],
-                     milk_id=int(request.form['milk']),
-                     place=request.form['place'],
-                     image=request.form['image'],
-                     user_id=login_session['user_id'])
+            new_cheese = add_item(db_session, Cheese,
+                                  name=request.form['name'],
+                                  type_id=int(request.form['type']),
+                                  description=request.form['description'],
+                                  milk_id=int(request.form['milk']),
+                                  place=request.form['place'],
+                                  image=request.form['image'],
+                                  user_id=login_session['user_id'])
         except ValueError as v:
             raise BadRequestr(v.args[0])
         else:
+            #return redirect(url_for('get_cheese', cheese_id=new_cheese.id))
             return redirect(url_for('get_index'))
 
 
 @app.route('/catalog/cheese/<int:cheese_id>/edit', methods=['GET', 'POST'])
 @db_operation
 def edit_cheese(db_session, cheese_id):
+    '''Serves the form for editing a cheese, and responds to the POST
+    request on form submission. Authorisation check is performed on all
+    requests, resulting in a Forbidden error in the event of failure. Required
+    fields are enforced by the client; server validation is also performed on
+    submission '''
     loggedin_user = login_session.get('user_id')
     user_name = login_session.get('user_name')
     if not loggedin_user:
@@ -235,6 +274,9 @@ def edit_cheese(db_session, cheese_id):
                           milk_id=int(request.form['milk']),
                           place=request.form['place'],
                           image=request.form['image'])
+            except KeyError:
+                raise NotFound(
+                      'No cheese with id {} could be found.'.format(cheese_id))
             except ValueError as v:
                 raise BadRequest(v.args[0])
             else:
@@ -244,6 +286,9 @@ def edit_cheese(db_session, cheese_id):
 @app.route('/catalog/cheese/<int:cheese_id>/delete', methods=['GET', 'POST'])
 @db_operation
 def delete_cheese(db_session, cheese_id):
+    '''Serves a confirmation request on deletion of a cheese, and responds to
+    the POST request on confirmation. Authorisation check is performed on all
+    requests, resulting in a Forbidden error in the event of failure. '''
     loggedin_user = login_session.get('user_id')
     if not loggedin_user:
         return redirect(url_for('login'))
@@ -261,36 +306,33 @@ def delete_cheese(db_session, cheese_id):
             return render_template('delete_cheese.html', cheese=cheese)
         elif request.method == 'POST':
             referrer = request.headers.get('Referer') or '/'
-            delete_item(db_session, Cheese, id=cheese_id)
-            return redirect(referrer)
+            try:
+                delete_item(db_session, Cheese, id=cheese_id)
+            except KeyError:
+                raise NotFound(
+                      'No cheese with id {} could be found.'.format(cheese_id))
+            else:
+                return redirect(referrer)
 
 
 @app.route('/login')
 def login():
+    '''Serves the login page. User id is obtained via Google authentication and
+    passed to the server by JS embedded in the login template '''
     referrer = request.headers.get('Referer') or '/'
     return render_template('login.html',
                            client_id=CLIENT_ID,
                            referrer=referrer)
 
 
-# json endpoints
-@app.route('/api/v1/cheeses')
-@db_operation
-def get_cheeses_json(db_session):
-    return \
-        jsonify(cheeses=[c.serialize for c in get_items(db_session, Cheese)])
-
-
-@app.route('/api/v1/cheese/<int:cheese_id>')
-@db_operation
-def get_cheese_json(db_session, cheese_id):
-    return jsonify(get_item(db_session, Cheese, id=cheese_id).serialize)
-
-
 # authorisation flow
 @app.route('/tokensignin', methods=['POST'])
 @db_operation
 def tokensignin(db_session):
+    '''On successful Google sign-in, exchange the resulting ID token for the
+    user's Google profile info. If the user is not known, they will be
+    registered automatically. User ID and profile info are added to the (Flask)
+    login session '''
     token_in = request.data
     client_id = json.loads(
         open('static/client_secret.json', 'r').read())['web']['client_id']
@@ -315,41 +357,45 @@ def tokensignin(db_session):
 
 @app.route('/signout')
 def sign_out():
+    '''Sign the user out by deleting their ID and profile info from the (Flask)
+    login session '''
     referrer = request.headers.get('Referer') or '/'
     del login_session['user_id']
     del login_session['user_name']
     return redirect(referrer)
 
 
+# json endpoints
+@app.route('/api/v1/cheeses')
+@db_operation
+def get_cheeses_json(db_session):
+    return \
+        jsonify(cheeses=[c.serialize for c in get_items(db_session, Cheese)])
+
+
+@app.route('/api/v1/cheese/<int:cheese_id>')
+@db_operation
+def get_cheese_json(db_session, cheese_id):
+    return jsonify(get_item(db_session, Cheese, id=cheese_id).serialize)
+
+
 # error handling
 @app.errorhandler(400)
 def bad_request(e):
+    '''Serves a custom template and message in the event of a 400 error '''
     return render_template('400.html', error=e), 400
 
 
 @app.errorhandler(403)
 def unauthorised(e):
+    '''Serves a custom template and message in the event of a 403 error '''
     return render_template('403.html', error=e), 403
 
 
 @app.errorhandler(404)
 def item_not_found(e):
+    '''Serves a custom template and message in the event of a 404 error '''
     return render_template('404.html', error=e), 404
-
-
-# testing
-@app.route('/testdb')
-@db_operation
-def get_users(db_session):
-    output = ''
-    i = 0
-    for u in session.query(Cheese).all():
-        output += str(u.id)
-        output += str(u.__dict__)
-        output += '</br>'
-        i += 1
-    output += str(i)
-    return output
 
 
 # start serving

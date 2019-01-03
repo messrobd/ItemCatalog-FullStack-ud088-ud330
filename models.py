@@ -101,6 +101,7 @@ class Cheese(Base):
 
     @validates('name', 'type_id', 'milk_id', 'user_id')
     def typecheck_fields(self, key, field):
+        '''Performs type-checking of required properties '''
         try:
             if key == 'name':
                 assert type(field) == str and field is not '', \
@@ -115,6 +116,7 @@ class Cheese(Base):
 
     @property
     def serialize(self):
+        '''Returns the writable properties of the object as a dictionary '''
         return {
             'name': self.name,
             'description': self.description,
@@ -126,6 +128,8 @@ class Cheese(Base):
 
     @serialize.setter
     def deserialize(self, properties):
+        '''Given a dictionary, updates the writable properties of the
+        object '''
         self.name = properties['name']
         self.description = properties['description']
         self.place = properties['place']
