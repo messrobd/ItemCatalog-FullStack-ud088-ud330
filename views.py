@@ -45,7 +45,7 @@ def db_operation(operation):
         session = DBSession()
         try:
             output = operation(session, *args, **kwargs)
-        except:
+        except Exception:
             raise
         else:
             return output
