@@ -190,17 +190,13 @@ def get_cheese(db_session, cheese_id):
         raise NotFound(
               'No cheese with id {} could be found.'.format(cheese_id))
     else:
-        type = get_item(db_session, Type, id=cheese.type_id)
-        milk = get_item(db_session, Milk, id=cheese.milk_id)
         cheese_creator = cheese.user_id
         can_edit = cheese_creator == loggedin_user
         user_name = login_session.get('user_name')
         return render_template('cheese.html',
                                user_name=user_name,
                                can_edit=can_edit,
-                               cheese=cheese,
-                               type=type,
-                               milk=milk)
+                               cheese=cheese)
 
 
 @app.route('/catalog/cheese/new', methods=['GET', 'POST'])
