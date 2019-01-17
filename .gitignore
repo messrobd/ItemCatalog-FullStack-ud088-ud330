@@ -5,3 +5,4 @@ __pycache__
 *.pyc
 test_db.py
 populate_cheesedb.py
+*.db
