@@ -137,7 +137,11 @@ class Cheese(Base):
         self.milk_id = properties['milk_id']
         self.image = properties['image']
 
+def create_pg_engine():
+    connection_string = 'postgresql:///item_catalog'
+    return create_engine(connection_string)
+
 
 # initialisation
-engine = create_engine('sqlite:///cheese.db')
+engine = create_pg_engine()
 Base.metadata.create_all(engine)

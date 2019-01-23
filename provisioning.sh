@@ -1,9 +1,15 @@
 # Initialise APP_HOME
 APP_HOME=${1:-'/vagrant'}
+DB_USER=${2:-'catalog'}
 
 # Fix locale
-export LC_CTYPE=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
+cat <<- EOF >> ~/.bashrc
+  LC_CTYPE=en_US.UTF-8
+  LC_ALL=en_US.UTF-8
+EOF
+
+# Add OS users
+sudo useradd -m ${DB_USER}
 
 # Start provisioning resources
 sudo apt-get update
@@ -17,7 +23,15 @@ pip3 install wheel
 pip3 install Flask psycopg2-binary SQLAlchemy
 deactivate
 
+# Install postgresql, create users and db
+sudo apt-get -y install postgresql
+
+sudo -u postgres createuser -d ${DB_USER}
+
+sudo -u postgres createdb item_catalog
+
 # Get app
+
 
 
 # Install and configure Apache mod-wsgi
@@ -26,7 +40,7 @@ sudo apt-get -y install apache2 libapache2-mod-wsgi-py3
 sudo cat << EOF | sudo tee /etc/apache2/sites-available/ItemCatalog.conf
 
 <VirtualHost *:80>
-  WSGIDaemonProcess ItemCatalog python-home=${APP_HOME}/venv threads=5
+  WSGIDaemonProcess ItemCatalog python-home=${APP_HOME}/venv user=${DB_USER} threads=5
   WSGIScriptAlias / ${APP_HOME}/entry.wsgi
 
   Alias /static/ ${APP_HOME}/static
@@ -45,8 +59,3 @@ sudo a2dissite 000-default
 sudo a2ensite ItemCatalog
 
 sudo service apache2 reload
-
-# Install postgresql
-sudo apt-get -y install postgresql
-
-sudo -u postgres createuser catalog
