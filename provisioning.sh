@@ -21,6 +21,7 @@ python3 -m venv ${APP_HOME}/venv
 source ${APP_HOME}/venv/bin/activate
 pip3 install wheel
 pip3 install Flask psycopg2-binary SQLAlchemy
+pip3 install requests google-auth
 deactivate
 
 # Install postgresql, create users and db

@@ -7,12 +7,14 @@ from flask import (
     redirect,
     session as login_session,
     jsonify)
-from models import (
+from app import app
+from app.models import (
     Base,
     User,
     Type,
     Milk,
-    Cheese)
+    Cheese,
+    create_pg_engine)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import (
     sessionmaker,
@@ -26,14 +28,16 @@ from werkzeug.exceptions import (
     NotFound,
     Forbidden,
     BadRequest)
-
+'''
 app = Flask(__name__)
 engine = create_engine('sqlite:///cheese.db')
+'''
+engine = create_pg_engine()
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
-CLIENT_ID = json.loads(
-    open('static/client_secret.json', 'r').read())['web']['client_id']
+CLIENT_ID = ''#json.loads(
+#    open('static/client_secret.json', 'r').read())['web']['client_id']
 
 
 # db operations
