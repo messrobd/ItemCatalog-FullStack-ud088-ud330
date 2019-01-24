@@ -1,11 +1,12 @@
-# Initialise APP_HOME
+# Initialise variables (default if not passed from VagrantFile)
 APP_HOME=${1:-'/vagrant'}
-DB_USER=${2:-'catalog'}
+APP_CONFIG=${2:-'configuration.DevConfig'}
+DB_USER=${3:-'catalog'}
 
 # Fix locale
 cat <<- EOF >> ~/.bashrc
-  LC_CTYPE=en_US.UTF-8
-  LC_ALL=en_US.UTF-8
+  export LC_CTYPE=en_US.UTF-8
+  export LC_ALL=en_US.UTF-8
 EOF
 
 # Add OS users
@@ -41,6 +42,7 @@ sudo apt-get -y install apache2 libapache2-mod-wsgi-py3
 sudo cat << EOF | sudo tee /etc/apache2/sites-available/ItemCatalog.conf
 
 <VirtualHost *:80>
+  SetEnv APP_CONFIG ${APP_CONFIG}
   WSGIDaemonProcess ItemCatalog python-home=${APP_HOME}/venv user=${DB_USER} threads=5
   WSGIScriptAlias / ${APP_HOME}/entry.wsgi
 

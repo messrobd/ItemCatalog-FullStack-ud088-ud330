@@ -36,8 +36,8 @@ engine = create_pg_engine()
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
-CLIENT_ID = ''#json.loads(
-#    open('static/client_secret.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(
+    open(app.config['CLIENT_SECRET'], 'r').read())['web']['client_id']
 
 
 # db operations
