@@ -3,8 +3,6 @@
 tasks.txt
 __pycache__
 *.pyc
-test_db.py
-populate_cheesedb.py
 *.db
 venv
 *.log

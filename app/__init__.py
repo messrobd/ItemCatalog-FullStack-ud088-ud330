@@ -15,11 +15,6 @@ def get_config():
 app = Flask(__name__)
 app.config.from_object(get_config())
 
-# initialise db and create tables
-Base = declarative_base()
-engine = create_pg_engine()
-Base.metadata.create_all(engine)
-
 # import views
 from . import views
 '''

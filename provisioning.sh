@@ -1,7 +1,8 @@
 # Initialise variables (default if not passed from VagrantFile)
-APP_HOME=${1:-'/vagrant'}
-APP_CONFIG=${2:-'configuration.DevConfig'}
-DB_USER=${3:-'catalog'}
+SYS_USER=$(whoami)
+
+APP_HOME=${APP_HOME:-${HOME}}
+DB_USER=${DB_USER:-${SYS_USER}}
 
 # Fix locale
 cat <<- EOF >> ~/.bashrc
@@ -17,7 +18,7 @@ sudo apt-get update
 
 # Set up python virtual environment
 sudo apt-get -y install python3-venv
-sudo mkdir -p ${APP_HOME} && sudo chown vagrant:vagrant $_
+sudo mkdir -p ${APP_HOME} && sudo chown ${SYS_USER}:${SYS_USER} $_
 python3 -m venv ${APP_HOME}/venv
 source ${APP_HOME}/venv/bin/activate
 pip3 install wheel
@@ -34,7 +35,11 @@ sudo -u postgres createdb item_catalog
 
 # Get app
 
-
+sudo -u ${DB_USER} bash << EOF
+source ${APP_HOME}/venv/bin/activate
+python3 ${APP_HOME}/${SETUP_SCRIPT}
+deactivate
+EOF
 
 # Install and configure Apache mod-wsgi
 sudo apt-get -y install apache2 libapache2-mod-wsgi-py3

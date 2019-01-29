@@ -8,6 +8,12 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", privileged: false do |script|
     script.path = "provisioning.sh"
+    script.env = {
+      "APP_HOME" => "/vagrant",
+      "DB_USER" => "catalog",
+      "APP_CONFIG" => "configuration.DevConfig",
+      "SETUP_SCRIPT" => "setup_db.py"
+    }
   end
 
 end
