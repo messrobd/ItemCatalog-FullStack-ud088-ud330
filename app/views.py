@@ -333,13 +333,11 @@ def tokensignin(db_session):
     registered automatically. User ID and profile info are added to the (Flask)
     login session '''
     token_in = request.data
-    client_id = json.loads(
-        open('static/client_secret.json', 'r').read())['web']['client_id']
     try:
         id_info = id_token.verify_oauth2_token(
             token_in,
             auth_requests.Request(),
-            client_id)
+            CLIENT_ID)
         if id_info['iss'] not in [
                 'accounts.google.com',
                 'https://accounts.google.com']:
