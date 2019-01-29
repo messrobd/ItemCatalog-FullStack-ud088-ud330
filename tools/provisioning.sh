@@ -1,8 +1,9 @@
 # Initialise variables (default if not passed from VagrantFile)
 SYS_USER=$(whoami)
-
-APP_HOME=${APP_HOME:-${HOME}}
-DB_USER=${DB_USER:-${SYS_USER}}
+APP_HOME=${APP_HOME:-'/var/Flask/ItemCatalog'}
+DB_USER=${DB_USER:-'catalog'}
+APP_CONFIG=${APP_CONFIG:-'configuration.DevConfig'}
+SETUP_SCRIPT=${SETUP_SCRIPT:-'setup_db.py'}
 
 # Fix locale
 cat <<- EOF >> ~/.bashrc
@@ -18,7 +19,7 @@ sudo apt-get update
 
 # Set up python virtual environment
 sudo apt-get -y install python3-venv
-sudo mkdir -p ${APP_HOME} && sudo chown ${SYS_USER}:${SYS_USER} $_
+#sudo mkdir -p ${APP_HOME} && sudo chown ${SYS_USER}:${SYS_USER} $_
 python3 -m venv ${APP_HOME}/venv
 source ${APP_HOME}/venv/bin/activate
 pip3 install wheel
@@ -34,6 +35,7 @@ sudo -u postgres createuser -d ${DB_USER}
 sudo -u postgres createdb item_catalog
 
 # Get app
+#cd ${APP_HOME} && git clone https://github.com/messrobd/ItemCatalog-FullStack-ud088-ud330.git
 
 sudo -u ${DB_USER} bash << EOF
 source ${APP_HOME}/venv/bin/activate
