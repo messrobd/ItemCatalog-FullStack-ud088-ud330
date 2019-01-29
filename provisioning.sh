@@ -51,8 +51,6 @@ sudo cat << EOF | sudo tee /etc/apache2/sites-available/ItemCatalog.conf
   WSGIDaemonProcess ItemCatalog python-home=${APP_HOME}/venv user=${DB_USER} threads=5
   WSGIScriptAlias / ${APP_HOME}/entry.wsgi
 
-  Alias /static/ ${APP_HOME}/static
-
   <Directory ${APP_HOME}>
     WSGIProcessGroup ItemCatalog
     WSGIApplicationGroup %{GLOBAL}

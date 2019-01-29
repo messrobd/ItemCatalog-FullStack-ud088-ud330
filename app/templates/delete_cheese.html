@@ -1,16 +1,9 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Delete cheese</title>
-    <link rel="stylesheet" href="/static/styles.css">
-  </head>
-  <body>
-    <h1>{{ cheese.name }} will be be permanently deleted, are you sure?</h1>
-    <form class="delete-cheese" action="{{ url_for('delete_cheese', cheese_id=cheese.id) }}" method="POST">
-      <input type="submit" name="delete" value="Delete">
-      <input type="button" name="cancel" onclick="history.back()" value="Cancel">
-    </form>
-
-  </body>
-</html>
+{% extends 'content_outline.html' %}
+{% block title %}{{ cheese.name }} - Delete {% endblock %}
+{% block header %}
+  <h1>{{ cheese.name }} will be be permanently deleted, are you sure?</h1>
+  <form class="delete-cheese" action="{{ url_for('delete_cheese', cheese_id=cheese.id) }}" method="POST">
+    <input type="submit" name="delete" value="Delete">
+    <input type="button" name="cancel" onclick="history.back()" value="Cancel">
+  </form>
+{% endblock %}

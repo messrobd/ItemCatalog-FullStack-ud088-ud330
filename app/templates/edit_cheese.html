@@ -1,50 +1,45 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Edit cheese</title>
-    <link rel="stylesheet" href="/static/styles.css">
-  </head>
-  <body>
-    <h1>Edit a cheese</h1>
-    <form class="update-cheese" action="{{ url_for('edit_cheese', cheese_id=cheese.id) }}" method="POST">
-      <label>Name:
-          <input required type="text" name="name" placeholder="Name is required!" value="{{ cheese.name }}">
-      </label>
-      <label>Type:
-        <select name="type">
-          {% for t in types %}
-            {% if t.id == cheese.type_id %}
-              <option value="{{ t.id  }}" selected>{{ t.name  }}</option>
-            {% else %}
-              <option value="{{ t.id  }}">{{ t.name  }}</option>
-            {% endif %}
-          {% endfor %}
-        </select>
-      </label>
-      <label>Description:
-        <textarea name="description" rows="5" cols="50">{{ cheese.description }}</textarea>
-      </label>
-      <label>Milk:
-        <select name="milk">
-          {% for m in milks %}
-            {% if m.id == cheese.milk_id %}
-              <option value="{{ m.id  }}" selected>{{ m.name  }}</option>
-            {% else %}
-              <option value="{{ m.id  }}">{{ m.name  }}</option>
-            {% endif %}
-          {% endfor %}
-        </select>
-      </label>
-      <label>Place of origin:
-          <input type="text" name="place" value="{{ cheese.place }}">
-      </label>
-      <label>Image url:
-          <input type="url" name="image" pattern="https?://.+" value="{{ cheese.image }}">
-      </label>
-      <input type="submit" value="Update cheese">
-      <input type="button" name="cancel" onclick="history.back()" value="Cancel">
-    </form>
-
-  </body>
-</html>
+{% extends 'content_outline.html' %}
+{% block title %}{{ cheese.name }} - Edit {% endblock %}
+{% block header %}
+  <h1>Edit a cheese</h1>
+{% endblock %}
+{% block details %}
+  <form class="update-cheese" action="{{ url_for('edit_cheese', cheese_id=cheese.id) }}" method="POST">
+    <label>Name:
+        <input required type="text" name="name" placeholder="Name is required!" value="{{ cheese.name }}">
+    </label>
+    <label>Type:
+      <select name="type">
+        {% for t in types %}
+          {% if t.id == cheese.type_id %}
+            <option value="{{ t.id  }}" selected>{{ t.name  }}</option>
+          {% else %}
+            <option value="{{ t.id  }}">{{ t.name  }}</option>
+          {% endif %}
+        {% endfor %}
+      </select>
+    </label>
+    <label>Description:
+      <textarea name="description" rows="5" cols="50">{{ cheese.description }}</textarea>
+    </label>
+    <label>Milk:
+      <select name="milk">
+        {% for m in milks %}
+          {% if m.id == cheese.milk_id %}
+            <option value="{{ m.id  }}" selected>{{ m.name  }}</option>
+          {% else %}
+            <option value="{{ m.id  }}">{{ m.name  }}</option>
+          {% endif %}
+        {% endfor %}
+      </select>
+    </label>
+    <label>Place of origin:
+        <input type="text" name="place" value="{{ cheese.place }}">
+    </label>
+    <label>Image url:
+        <input type="url" name="image" pattern="https?://.+" value="{{ cheese.image }}">
+    </label>
+    <input type="submit" value="Update cheese">
+    <input type="button" name="cancel" onclick="history.back()" value="Cancel">
+  </form>
+{% endblock %}

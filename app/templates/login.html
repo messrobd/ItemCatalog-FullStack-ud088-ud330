@@ -1,16 +1,14 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
+{% extends 'base.html' %}
+  {% block title %}Login {% endblock  %}
+  {% block head %}
+    {{ super() }}
     <meta name="google-signin-client_id" content="{{ client_id }}">
-    <title>Login</title>
-    <link rel="stylesheet" href="/static/styles.css">
     <!-- import jquery pre-requisite for google auth flow sample code -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <!-- import google platform API pre-requisite for google auth flow -->
     <script src="https://apis.google.com/js/platform.js" async defer></script>
-  </head>
-  <body>
+  {% endblock %}
+  {% block body %}
     <div id="signin-dialog">
       <!-- Google signin component -->
       <div class="g-signin2" data-onsuccess="onSuccess" data-onfailure="onFailure">
@@ -44,5 +42,4 @@
       }
 
     </script>
-  </body>
-</html>
+{% endblock %}

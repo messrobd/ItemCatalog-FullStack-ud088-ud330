@@ -1,44 +1,45 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>{{ cheese.name }}</title>
-    <link rel="stylesheet" href="/static/styles.css">
-  </head>
-  <body>
-    {% include 'partials/signin_status.html' %}
-    <div class="breadcrumb">
-      <p><a href="{{ url_for('get_index') }}">Home</a> >>
-        <a href="{{ url_for('get_cheeses', type_id=cheese.type.id) }}">{{ cheese.type.name }}</a> >>
-        {{ cheese.name }}
-      </p>
+{% extends 'content_outline.html' %}
+{% block title %}{{ cheese.name }}{% endblock %}
+{% block sign_in %}
+  {% include 'partials/signin_status.html' %}
+{% endblock %}
+{% block breadcrumb %}
+  <div class="breadcrumb">
+    <p><a href="{{ url_for('get_index') }}">Home</a> >>
+      <a href="{{ url_for('get_cheeses', type_id=cheese.type.id) }}">{{ cheese.type.name }}</a> >>
+      {{ cheese.name }}
+    </p>
+  </div>
+{% endblock %}
+{% block content %}
+  <div class="cheese">
+  {% block header %}
+    <div class="heading">
+      <h1>{{ cheese.name }}</h1>
+      {% if can_edit %}
+        <form class="cheese-actions">
+          <input type="button" name="edit" onclick="location.href='{{ url_for('edit_cheese', cheese_id=cheese.id) }}'" value="Edit">
+          <input type="button" name="delete" onclick="location.href='{{ url_for('delete_cheese', cheese_id=cheese.id) }}'" value="Delete">
+        </form>
+      {% endif %}
     </div>
-    <div class="cheese">
-      <div class="heading">
-        <h1>{{ cheese.name }}</h1>
-        {% if can_edit %}
-          <form class="cheese-actions">
-            <input type="button" name="edit" onclick="location.href='{{ url_for('edit_cheese', cheese_id=cheese.id) }}'" value="Edit">
-            <input type="button" name="delete" onclick="location.href='{{ url_for('delete_cheese', cheese_id=cheese.id) }}'" value="Delete">
-          </form>
+  {% endblock %}
+  {% block details %}
+    <div class="cheese-data">
+      <div>
+        {% if cheese.image %}
+          <img class="cheese-image" src="{{ cheese.image }}" alt="img:{{ cheese.name }}">
+        {% else %}
+          <img class="cheese-image" src="/static/Cheese_pin.png" alt="img:{{ cheese.name }}">
         {% endif %}
       </div>
-      <div class="cheese-data">
-        <div>
-          {% if cheese.image %}
-            <img class="cheese-image" src="{{ cheese.image }}" alt="img:{{ cheese.name }}">
-          {% else %}
-            <img class="cheese-image" src="/static/Cheese_pin.png" alt="img:{{ cheese.name }}">
-          {% endif %}
-        </div>
-        <div class="cheese-details">
-          <div class="cheese-description">{{ cheese.description }}</div>
-          <div class="cheese-attr">Type: {{ cheese.type.name }}</div>
-          <div class="cheese-attr">Milk: {{ cheese.milk.name }}</div>
-          <div class="cheese-attr">Place of origin: {{ cheese.place }}</div>
-        </div>
+      <div class="cheese-details">
+        <div class="cheese-description">{{ cheese.description }}</div>
+        <div class="cheese-attr">Type: {{ cheese.type.name }}</div>
+        <div class="cheese-attr">Milk: {{ cheese.milk.name }}</div>
+        <div class="cheese-attr">Place of origin: {{ cheese.place }}</div>
       </div>
     </div>
-
-  </body>
-</html>
+  {% endblock %}
+  </div>
+{% endblock %}
