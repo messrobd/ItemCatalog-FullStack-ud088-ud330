@@ -30,7 +30,7 @@
         {% if cheese.image %}
           <img class="cheese-image" src="{{ cheese.image }}" alt="img:{{ cheese.name }}">
         {% else %}
-          <img class="cheese-image" src="/static/Cheese_pin.png" alt="img:{{ cheese.name }}">
+          <img class="cheese-image" src="{{ url_for('static', filename='cheese.png') }}" alt="img:{{ cheese.name }}">
         {% endif %}
       </div>
       <div class="cheese-details">
