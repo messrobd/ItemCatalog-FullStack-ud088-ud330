@@ -17,8 +17,3 @@ app.config.from_object(get_config())
 
 # import views
 from . import views
-'''
-@app.route('/')
-def success():
-    return 'Item catalog app is receiving you, over'
-'''

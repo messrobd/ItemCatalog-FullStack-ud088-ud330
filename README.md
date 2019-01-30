@@ -11,27 +11,48 @@ The following is a summary of the capabilities:
   if the logged-in user is its creator
 
 
+Access the development server at http://3.8.154.247.xip.io/
+
+
 How to run the application
 
+Option 1: Using Vagrant and VirtualBox
+
 1. Fork the repo
-2. CD into the repo and run 'vagrant up' to bring up the vm
-3. 'vagrant ssh' into the vm and cd to /vagrant to access the shared folder
-4. run 'python views.py' to start serving (or python3, depending on your environment)
-5. browse to localhost:5000 to access the front page
+2. CD into the repo and run 'vagrant up' to bring up the vm. The VagrantFile
+invokes a provisioning script that concludes by initialising the webserver
+3. Access the site at localhost:8080. Some sample entries are provided
+
+Option 2: On Lightsail
+
+It has been set up using the following procedure.
+
+1. Copy the contents of tools/bootstrap.sh into a script file on the VM. This
+script clones the git repo into a predetermined APP_HOME directory
+  - Important: do change the APP_HOME directory without reading on
+2. CD to the APP_HOME directory, which should now have all the source files for
+the app
+3. change permissions on tools/provisioning.sh to allow it to be executed
+(chmod 764 tools/provisioning.sh)
+4. Run the script, which concludes by initialising the webserver (see Option 1)
+
+User 'grader' can in to 3.8.154.247
 
 
 Design
 
+A full list of dependencies can be found in requirements.txt 
+
 Database
 
-Data is stored in a sqlite database configured via sqlalchemy and accessed from
+Data is stored in a postgresql database configured via sqlalchemy and accessed from
 application code using sqlalchemy ORM. Table definition and other db details
 can be found in models.py.
 
 Web server
 
-The web server is implemented using Flask. See views.py for the implementation
-of all handlers.
+The webserver is apache2, serving a Python 3 mod_wsgi application using Flask.
+See views.py for the implementation of all handlers.
 
 In keeping with sqlalchemy recommendations [1], all handlers that involve
 database operations initialise and close their own db session.
@@ -45,6 +66,8 @@ sub-directory.
 Form validation is done on the client side using built-in hrml and css features
 [4, 5]. Additional validation is done server-side, resulting in 400 errors
 handled by Flask errorhandlers  
+
+Python requirements are maintained in a virtual environment
 
 Authn/Authz
 
@@ -73,6 +96,9 @@ Other files
 
 The repo contains certain other files which are not system components:
 * Vagrantfile: configuration for the Vagrant VM (provided by Udacity)
+* tools/provisioning.sh: script for setting up the python virtual environment,
+database and webserver
+* tools/bootstrap.sh: script for getting the app code onto Lightsail
 * secret_key_generator.py: a script for generating the secret key used to sign
 the Flask login session
 
@@ -84,3 +110,7 @@ References:
   3. https://developers.google.com/identity/sign-in/web/backend-auth
   4. https://www.the-art-of-web.com/html/html5-form-validation/
   5. https://stackoverflow.com/questions/9707021/how-do-i-auto-hide-placeholder-text-upon-focus-using-css-or-jquery
+  6. https://www.vagrantup.com/docs/provisioning/shell.html
+  7. https://www.bogotobogo.com/python/Flask/Python_Flask_HelloWorld_App_with_Apache_WSGI_Ubuntu14.php
+  8. http://flask.pocoo.org/docs/1.0/tutorial/static/
+  9. https://www.digitalocean.com/community/tutorials/how-to-structure-large-flask-applications

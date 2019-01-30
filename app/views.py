@@ -28,10 +28,8 @@ from werkzeug.exceptions import (
     NotFound,
     Forbidden,
     BadRequest)
-'''
-app = Flask(__name__)
-engine = create_engine('sqlite:///cheese.db')
-'''
+
+
 engine = create_pg_engine()
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
@@ -393,10 +391,3 @@ def unauthorised(e):
 def item_not_found(e):
     '''Serves a custom template and message in the event of a 404 error '''
     return render_template('404.html', error=e), 404
-
-
-# start serving
-if __name__ == '__main__':
-    app.secret_key = b'B\xe8\xa5\xba\xedk=\x1al@x\xd5\xa8\xbf\xe8f'
-    app.debug = True
-    app.run(host='0.0.0.0', port=5000)

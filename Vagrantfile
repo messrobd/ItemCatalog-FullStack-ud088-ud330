@@ -7,9 +7,9 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 80, host: 8080
 
   config.vm.provision "shell", privileged: false do |script|
-    script.path = "bootstrap.sh"
+    script.path = "tools/provisioning.sh"
     script.env = {
-      "APP_HOME" => "/var/www/Flask/ItemCatalog",
+      "APP_HOME" => "/vagrant",
       "DB_USER" => "catalog",
       "APP_CONFIG" => "configuration.DevConfig",
       "SETUP_SCRIPT" => "setup_db.py"

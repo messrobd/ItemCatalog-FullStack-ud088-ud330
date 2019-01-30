@@ -1,7 +1,6 @@
 # Initialise variables
 SYS_USER=$(whoami)
-
-[ ! -z ${APP_HOME} ] || { echo 'APP_HOME path must be defined'; exit; }
+APP_HOME=${APP_HOME:-'/var/www/Flask/ItemCatalog'}
 
 sudo mkdir -p ${APP_HOME} && sudo chown ${SYS_USER}:${SYS_USER} $_
 
